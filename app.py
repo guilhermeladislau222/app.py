@@ -2,15 +2,94 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# [Mantenha as definições de IMPACT_FACTORS e IMPACT_NAMES como estavam]
+# Definição dos fatores de impacto (simplificados para este exemplo)
+IMPACT_FACTORS = {
+    'eletricidade': {
+        'aquecimento_global': 0.25056,
+        'ecotoxidade_agua': 0.00097,
+        'eutrofizacao_agua': 0.00000,
+    },
+    'cloreto_ferrico': {
+        'aquecimento_global': 0.05594,
+        'ecotoxidade_agua': 0.06756,
+        'eutrofizacao_agua': 1.09053,
+    },
+    'sulfato_aluminio': {
+        'aquecimento_global': 0.35950,
+        'ecotoxidade_agua': 0.06946,
+        'eutrofizacao_agua': 0.00034,
+    },
+}
 
-# [Mantenha a função calculate_impacts como estava]
+IMPACT_NAMES = {
+    'aquecimento_global': "Aquecimento Global (kg CO2 eq)",
+    'ecotoxidade_agua': "Ecotoxidade de Água Doce (kg 1,4-DCB)",
+    'eutrofizacao_agua': "Eutrofização de Água Doce (kg P eq)",
+}
+
+def calculate_impacts(inputs):
+    results = {impact: 0 for impact in IMPACT_NAMES}
+    for input_name, value in inputs.items():
+        if input_name in IMPACT_FACTORS:
+            for impact, factor in IMPACT_FACTORS[input_name].items():
+                results[impact] += value * factor
+    return results
 
 st.title('Avaliação do Ciclo de Vida para ETE')
 
-# [Mantenha o Passo 1 e Passo 2 como estavam]
+# Passo 1: Processo de Tratamento
+st.header('Passo 1: Processo de Tratamento')
 
-# Novo Passo 3
+# Tratamento Preliminar (obrigatório)
+st.subheader('Tratamento Preliminar')
+st.write('O tratamento preliminar é obrigatório.')
+
+col1, col2 = st.columns(2)
+with col1:
+    distance = st.number_input('Distância para o transporte de resíduos (Ida e Volta) (km)', min_value=0.0, step=0.1)
+    quantity = st.number_input('Quantidade de resíduos (ton/m³)', min_value=0.0, step=0.001)
+with col2:
+    destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'])
+
+st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
+st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
+
+ton_km_factor = distance * quantity
+st.write(f'Fator ton.km: {ton_km_factor:.2f}')
+
+# UASB (pré-selecionado)
+st.subheader('Tratamento UASB')
+st.write('O tratamento UASB está pré-selecionado.')
+
+# Processos adicionais
+st.subheader('Processos Adicionais')
+additional_processes = st.multiselect(
+    'Selecione o(s) Processo(s) Adicional(is)',
+    ['Wetland de Fluxo Vertical', 'Filtro Biológico percolador + Decantador Segundario', 'Lagoa de Polimento']
+)
+
+# Passo 2: Inventário do ciclo de vida
+st.header('Passo 2: Inventário do ciclo de vida')
+
+inputs = {}
+
+st.subheader('Consumo de Energia')
+inputs['eletricidade'] = st.number_input('Eletricidade (kWh/m³)', value=0.0, step=0.1)
+
+st.subheader('Uso da Terra')
+inputs['area_utilizada'] = st.number_input('Área utilizada (m²)', value=0.0, step=0.1)
+
+st.subheader('Emissões para a Água')
+inputs['fosforo_total'] = st.number_input('Fósforo Total (kg/m³)', value=0.0, step=0.001)
+inputs['nitrogenio_total'] = st.number_input('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
+
+st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
+if st.checkbox('Mostrar mais'):
+    optional_params = ['Bário', 'Cobre', 'Selênio', 'Zinco', 'Tolueno', 'Cromo', 'Cádmio', 'Chumbo', 'Níquel']
+    for param in optional_params:
+        inputs[param.lower()] = st.number_input(f'{param} (kg/m³)', value=0.0, step=0.0001)
+
+# Passo 3: Disposição do Lodo
 st.header('Passo 3: Disposição do Lodo')
 
 disposicao_lodo = st.selectbox(
@@ -27,7 +106,6 @@ if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
     with col2:
         quantidade_lodo = st.number_input('Quantidade de lodo (ton/m³)', min_value=0.0, step=0.001)
     
-    # Cálculo do fator ton.km para o lodo
     ton_km_factor_lodo = distancia_lodo * quantidade_lodo
     st.write(f'Fator ton.km para o lodo: {ton_km_factor_lodo:.2f}')
 
