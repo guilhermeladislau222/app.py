@@ -2,67 +2,49 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Definição dos fatores de impacto (simplificados para este exemplo)
-IMPACT_FACTORS = {
-    'eletricidade': {
-        'aquecimento_global': 0.25056,
-        'ecotoxidade_agua': 0.00097,
-        'eutrofizacao_agua': 0.00000,
-    },
-    'cloreto_ferrico': {
-        'aquecimento_global': 0.05594,
-        'ecotoxidade_agua': 0.06756,
-        'eutrofizacao_agua': 1.09053,
-    },
-    'sulfato_aluminio': {
-        'aquecimento_global': 0.35950,
-        'ecotoxidade_agua': 0.06946,
-        'eutrofizacao_agua': 0.00034,
-    },
-}
-
-IMPACT_NAMES = {
-    'aquecimento_global': "Aquecimento Global (kg CO2 eq)",
-    'ecotoxidade_agua': "Ecotoxidade de Água Doce (kg 1,4-DCB)",
-    'eutrofizacao_agua': "Eutrofização de Água Doce (kg P eq)",
-}
+# ... (mantenha as definições de IMPACT_FACTORS e IMPACT_NAMES como estavam) ...
 
 def calculate_impacts(inputs):
-    results = {impact: 0 for impact in IMPACT_NAMES}
-    for input_name, value in inputs.items():
-        if input_name in IMPACT_FACTORS:
-            for impact, factor in IMPACT_FACTORS[input_name].items():
-                results[impact] += value * factor
-    return results
+    # ... (mantenha esta função como estava) ...
 
 st.title('Avaliação do Ciclo de Vida para ETE')
 
 st.header('Passo 1: Processo de Tratamento')
+
+# Tratamento Preliminar (obrigatório)
+st.subheader('Tratamento Preliminar')
+st.write('O tratamento preliminar é obrigatório.')
+
+# Campos para o tratamento preliminar
+col1, col2 = st.columns(2)
+with col1:
+    distance = st.number_input('Distância para o transporte de resíduos (Ida e Volta) (km)', min_value=0.0, step=0.1)
+    quantity = st.number_input('Quantidade de resíduos (ton/m³)', min_value=0.0, step=0.001)
+with col2:
+    destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'])
+
+st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
+st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
+
+# Cálculo do fator ton.km
+ton_km_factor = distance * quantity
+st.write(f'Fator ton.km: {ton_km_factor:.2f}')
+
+# Outros processos (opcionais)
+st.subheader('Processos Adicionais')
 processes = st.multiselect(
-    'Selecione o(s) Processo(s)',
+    'Selecione o(s) Processo(s) Adicional(is)',
     ['UASB', 'Wetland de Fluxo Vertical', 'Filtro Biológico Percolador', 'Lagoa de Polimento']
 )
 
-chemicals = st.multiselect(
-    'Selecione os Produto(s) Químico(s) utilizados',
-    list(IMPACT_FACTORS.keys())
-)
-
-st.header('Passo 2: Inventário do ciclo de vida')
-inputs = {}
-
-st.subheader('Consumo de Energia')
-inputs['eletricidade'] = st.number_input('Eletricidade (kWh/m³)', value=0.0, step=0.1)
-
-st.subheader('Consumo de Produtos Químicos')
-for chemical in chemicals:
-    inputs[chemical] = st.number_input(f'{chemical.replace("_", " ").title()} (kg/m³)', value=0.0, step=0.1)
-
-st.subheader('Emissões para a Água')
-inputs['fosforo_total'] = st.number_input('Fósforo Total (kg/m³)', value=0.0, step=0.001)
-inputs['nitrogenio_total'] = st.number_input('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
+# ... (mantenha o resto do código como estava, incluindo a seleção de químicos,
+#      entradas de consumo de energia, produtos químicos e emissões para a água) ...
 
 if st.button('Calcular Impactos'):
+    # Adicione o fator ton.km e o destino dos resíduos aos inputs
+    inputs['ton_km_factor'] = ton_km_factor
+    inputs['destino_residuos'] = destination
+    
     results = calculate_impacts(inputs)
     
     st.header('Resultados')
