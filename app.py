@@ -58,30 +58,36 @@ st.info('Os impactos em cada categoria são diferentes de acordo com a destinaç
 ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2f}')
 
-# Outros processos (opcionais)
+# UASB (pré-selecionado)
+st.subheader('Tratamento UASB')
+st.write('O tratamento UASB está pré-selecionado.')
+
+# Processos adicionais
 st.subheader('Processos Adicionais')
-processes = st.multiselect(
+additional_processes = st.multiselect(
     'Selecione o(s) Processo(s) Adicional(is)',
-    ['UASB', 'Wetland de Fluxo Vertical', 'Filtro Biológico Percolador', 'Lagoa de Polimento']
+    ['Wetland de Fluxo Vertical', 'Filtro Biológico percolador + Decantador Segundario', 'Lagoa de Polimento']
 )
 
 st.header('Passo 2: Inventário do ciclo de vida')
+
 inputs = {}
 
 st.subheader('Consumo de Energia')
 inputs['eletricidade'] = st.number_input('Eletricidade (kWh/m³)', value=0.0, step=0.1)
 
-st.subheader('Consumo de Produtos Químicos')
-chemicals = st.multiselect(
-    'Selecione os Produto(s) Químico(s) utilizados',
-    list(IMPACT_FACTORS.keys())
-)
-for chemical in chemicals:
-    inputs[chemical] = st.number_input(f'{chemical.replace("_", " ").title()} (kg/m³)', value=0.0, step=0.1)
+st.subheader('Uso da Terra')
+inputs['area_utilizada'] = st.number_input('Área utilizada (m²)', value=0.0, step=0.1)
 
 st.subheader('Emissões para a Água')
 inputs['fosforo_total'] = st.number_input('Fósforo Total (kg/m³)', value=0.0, step=0.001)
 inputs['nitrogenio_total'] = st.number_input('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
+
+st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
+if st.checkbox('Mostrar mais'):
+    optional_params = ['Bário', 'Cobre', 'Selênio', 'Zinco', 'Tolueno', 'Cromo', 'Cádmio', 'Chumbo', 'Níquel']
+    for param in optional_params:
+        inputs[param.lower()] = st.number_input(f'{param} (kg/m³)', value=0.0, step=0.0001)
 
 if st.button('Calcular Impactos'):
     # Adicione o fator ton.km e o destino dos resíduos aos inputs
