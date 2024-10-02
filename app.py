@@ -35,64 +35,70 @@ def calculate_impacts(inputs):
                 results[impact] += value * factor
     return results
 
-def main():
-    st.title('Avaliação do Ciclo de Vida para ETE')
+st.title('Avaliação do Ciclo de Vida para ETE')
 
-    st.header('Passo 1: Processo de Tratamento')
+st.header('Passo 1: Processo de Tratamento')
 
-    # Tratamento UASB (obrigatório)
-    st.subheader('Tratamento UASB')
-    st.write('O tratamento UASB é obrigatório.')
+# Tratamento Preliminar (obrigatório)
+st.subheader('Tratamento Preliminar')
+st.write('O tratamento preliminar é obrigatório.')
 
-    # Processos adicionais (opcionais)
-    st.subheader('Processos Adicionais')
-    additional_processes = {
-        'wetland': st.checkbox('Wetland de Fluxo Vertical'),
-        'filtro': st.checkbox('Filtro Biológico Percolador +Decantador Secundário'),
-        'lagoa': st.checkbox('Lagoa de Polimento')
-    }
+# Campos para o tratamento preliminar
+col1, col2 = st.columns(2)
+with col1:
+    distance = st.number_input('Distância para o transporte de resíduos (Ida e Volta) (km)', min_value=0.0, step=0.1)
+    quantity = st.number_input('Quantidade de resíduos (ton/m³)', min_value=0.0, step=0.001)
+with col2:
+    destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'])
 
-    st.header('Passo 2: Inventário do ciclo de vida')
-    inputs = {}
+st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
+st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
 
-    # Consumo de Energia
-    st.subheader('Consumo de Energia')
-    inputs['eletricidade'] = st.number_input('Eletricidade (kWh/m³)', value=0.0, step=0.1)
-    st.info('Se selecionou reaproveitamento de gás, somar a energia gasta do sistema de reaproveitamento.')
+# Cálculo do fator ton.km
+ton_km_factor = distance * quantity
+st.write(f'Fator ton.km: {ton_km_factor:.2f}')
 
-    # Uso da Terra
-    st.subheader('Uso da Terra')
-    inputs['area_utilizada'] = st.number_input('Área utilizada (m²)', value=0.0, step=1.0)
+# Outros processos (opcionais)
+st.subheader('Processos Adicionais')
+processes = st.multiselect(
+    'Selecione o(s) Processo(s) Adicional(is)',
+    ['UASB', 'Wetland de Fluxo Vertical', 'Filtro Biológico Percolador', 'Lagoa de Polimento']
+)
 
-    # Emissões para a Água
-    st.subheader('Emissões para a Água')
-    inputs['fosforo_total'] = st.number_input('Fósforo Total (kg/m³)', value=0.0, step=0.001)
-    inputs['nitrogenio_total'] = st.number_input('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
+st.header('Passo 2: Inventário do ciclo de vida')
+inputs = {}
 
-    # Parâmetros opcionais
-    show_optional = st.checkbox('Mostrar parâmetros opcionais')
-    if show_optional:
-        optional_params = ['Bário', 'Cobre', 'Selenio', 'Zinco', 'Tolueno', 'Cromo', 'Cádmio', 'Chumbo', 'Níquel']
-        for param in optional_params:
-            inputs[param.lower()] = st.number_input(f'{param} (kg/m³)', value=0.0, step=0.0001)
+st.subheader('Consumo de Energia')
+inputs['eletricidade'] = st.number_input('Eletricidade (kWh/m³)', value=0.0, step=0.1)
 
-    st.info('Fósforo e nitrogênio é obrigatório informar. Os outros parâmetros são opcionais.')
+st.subheader('Consumo de Produtos Químicos')
+chemicals = st.multiselect(
+    'Selecione os Produto(s) Químico(s) utilizados',
+    list(IMPACT_FACTORS.keys())
+)
+for chemical in chemicals:
+    inputs[chemical] = st.number_input(f'{chemical.replace("_", " ").title()} (kg/m³)', value=0.0, step=0.1)
 
-    if st.button('Calcular Impactos'):
-        results = calculate_impacts(inputs)
-        
-        st.header('Resultados')
-        
-        # Criar um DataFrame para os resultados
-        df_results = pd.DataFrame(list(results.items()), columns=['Impacto', 'Valor'])
-        df_results['Impacto'] = df_results['Impacto'].map(IMPACT_NAMES)
-        
-        # Criar gráfico de barras com Plotly
-        fig = px.bar(df_results, x='Impacto', y='Valor', title='Impactos Ambientais')
-        st.plotly_chart(fig)
-        
-        # Mostrar resultados em formato de tabela
-        st.table(df_results)
+st.subheader('Emissões para a Água')
+inputs['fosforo_total'] = st.number_input('Fósforo Total (kg/m³)', value=0.0, step=0.001)
+inputs['nitrogenio_total'] = st.number_input('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
 
-if __name__ == "__main__":
-    main()
+if st.button('Calcular Impactos'):
+    # Adicione o fator ton.km e o destino dos resíduos aos inputs
+    inputs['ton_km_factor'] = ton_km_factor
+    inputs['destino_residuos'] = destination
+    
+    results = calculate_impacts(inputs)
+    
+    st.header('Resultados')
+    
+    # Criar um DataFrame para os resultados
+    df_results = pd.DataFrame(list(results.items()), columns=['Impacto', 'Valor'])
+    df_results['Impacto'] = df_results['Impacto'].map(IMPACT_NAMES)
+    
+    # Criar gráfico de barras com Plotly
+    fig = px.bar(df_results, x='Impacto', y='Valor', title='Impactos Ambientais')
+    st.plotly_chart(fig)
+    
+    # Mostrar resultados em formato de tabela
+    st.table(df_results)
