@@ -252,6 +252,22 @@ IMPACT_NAMES = {
     'Ecotoxidade Terrestre': "Ecotoxidade Terrestre (kg 1,4-DCB)",
 }
 
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+# [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está]
+
+def parse_scientific_notation(value):
+    try:
+        return float(value)
+    except ValueError:
+        return 0.0
+
+def number_input_scientific(label, value=0.0, step=0.1):
+    value_input = st.text_input(label, value=str(value))
+    return parse_scientific_notation(value_input)
+
 def calculate_impacts(inputs):
     results = {impact: 0 for impact in IMPACT_NAMES}
     for input_name, value in inputs.items():
@@ -271,8 +287,8 @@ st.write('O tratamento preliminar é obrigatório.')
 
 col1, col2 = st.columns(2)
 with col1:
-    distance = st.number_input('Distância para o transporte de resíduos (Ida e Volta) (km)', min_value=0.0, step=0.1)
-    quantity = st.number_input('Quantidade de resíduos (ton/m³)', min_value=0.0, step=0.001)
+    distance = number_input_scientific('Distância para o transporte de resíduos (Ida e Volta) (km)', value=0.0, step=0.1)
+    quantity = number_input_scientific('Quantidade de resíduos (ton/m³)', value=0.0, step=0.001)
 with col2:
     destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'])
 
@@ -280,7 +296,7 @@ st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
 st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
 
 ton_km_factor = distance * quantity
-st.write(f'Fator ton.km: {ton_km_factor:.2f}')
+st.write(f'Fator ton.km: {ton_km_factor:.2e}')
 
 # UASB (pré-selecionado)
 st.subheader('Tratamento UASB')
@@ -299,20 +315,20 @@ st.header('Passo 2: Inventário do ciclo de vida')
 inputs = {}
 
 st.subheader('Consumo de Energia')
-inputs['eletricidade'] = st.number_input('Eletricidade (kWh/m³)', value=0.0, step=0.1)
+inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1)
 
 st.subheader('Uso da Terra')
-inputs['area_utilizada'] = st.number_input('Área utilizada (m²)', value=0.0, step=0.1)
+inputs['area_utilizada'] = number_input_scientific('Área utilizada (m²)', value=0.0, step=0.1)
 
 st.subheader('Emissões para a Água')
-inputs['fosforo_total'] = st.number_input('Fósforo Total (kg/m³)', value=0.0, step=0.001)
-inputs['nitrogenio_total'] = st.number_input('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
+inputs['fosforo_total'] = number_input_scientific('Fósforo Total (kg/m³)', value=0.0, step=0.001)
+inputs['nitrogenio_total'] = number_input_scientific('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
 
 st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
 if st.checkbox('Mostrar mais'):
     optional_params = ['Bário', 'Cobre', 'Selênio', 'Zinco', 'Tolueno', 'Cromo', 'Cádmio', 'Chumbo', 'Níquel']
     for param in optional_params:
-        inputs[param.lower()] = st.number_input(f'{param} (kg/m³)', value=0.0, step=0.0001)
+        inputs[param.lower()] = number_input_scientific(f'{param} (kg/m³)', value=0.0, step=0.0001)
 
 # Passo 3: Disposição do Lodo
 st.header('Passo 3: Disposição do Lodo')
@@ -327,21 +343,21 @@ if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
     
     col1, col2 = st.columns(2)
     with col1:
-        distancia_lodo = st.number_input('Distância para o transporte do lodo (Ida e Volta) (km)', min_value=0.0, step=0.1)
+        distancia_lodo = number_input_scientific('Distância para o transporte do lodo (Ida e Volta) (km)', value=0.0, step=0.1)
     with col2:
-        quantidade_lodo = st.number_input('Quantidade de lodo (ton/m³)', min_value=0.0, step=0.001)
+        quantidade_lodo = number_input_scientific('Quantidade de lodo (ton/m³)', value=0.0, step=0.001)
     
     ton_km_factor_lodo = distancia_lodo * quantidade_lodo
-    st.write(f'Fator ton.km para o lodo: {ton_km_factor_lodo:.2f}')
+    st.write(f'Fator ton.km para o lodo: {ton_km_factor_lodo:.2e}')
 
 elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
     st.subheader('Composição do Lodo')
     
     col1, col2 = st.columns(2)
     with col1:
-        inputs['lodo_fosforo'] = st.number_input('Fósforo (kg/m³)', min_value=0.0, step=0.001)
+        inputs['lodo_fosforo'] = number_input_scientific('Fósforo (kg/m³)', value=0.0, step=0.001)
     with col2:
-        inputs['lodo_nitrogenio'] = st.number_input('Nitrogênio Amoniacal (kg/m³)', min_value=0.0, step=0.001)
+        inputs['lodo_nitrogenio'] = number_input_scientific('Nitrogênio Amoniacal (kg/m³)', value=0.0, step=0.001)
     
     st.write("Elementos adicionais (opcionais)")
     if st.checkbox('Mostrar mais elementos'):
@@ -350,7 +366,7 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
             'Molibdênio', 'Níquel', 'Estanho', 'Zinco', '1,4-Diclorobenzeno'
         ]
         for elemento in elementos_adicionais:
-            inputs[f'lodo_{elemento.lower()}'] = st.number_input(f'{elemento} (kg/m³)', value=0.0, step=0.0001)
+            inputs[f'lodo_{elemento.lower()}'] = number_input_scientific(f'{elemento} (kg/m³)', value=0.0, step=0.0001)
 
 # Passo 4: Queima de Biogás
 st.header('Passo 4: Queima de Biogás')
@@ -362,17 +378,17 @@ tipo_queimador = st.selectbox(
 
 if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
     st.subheader('Emissões do Queimador Fechado')
-    inputs['dioxido_carbono'] = st.number_input('Dióxido de Carbono (kg/m³)', min_value=0.0, step=0.001)
+    inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
 
 elif tipo_queimador == 'Queimador aberto':
     st.subheader('Emissões do Queimador Aberto')
     
     col1, col2 = st.columns(2)
     with col1:
-        inputs['metano'] = st.number_input('Metano (kg/m³)', min_value=0.0, step=0.001)
-        inputs['dioxido_carbono'] = st.number_input('Dióxido de Carbono (kg/m³)', min_value=0.0, step=0.001)
+        inputs['metano'] = number_input_scientific('Metano (kg/m³)', value=0.0, step=0.001)
+        inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
     with col2:
-        inputs['oxido_nitroso'] = st.number_input('Óxido Nitroso (kg/m³)', min_value=0.0, step=0.001)
+        inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
 
 if st.button('Calcular Impactos'):
     # Adicione as informações do lodo aos inputs
