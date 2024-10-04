@@ -2,29 +2,63 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Definição dos fatores de impacto (simplificados para este exemplo)
+# Definição dos fatores de impacto baseados na tabela fornecida
 IMPACT_FACTORS = {
     'eletricidade': {
-        'aquecimento_global': 0.25056,
-        'ecotoxidade_agua': 0.00097,
-        'eutrofizacao_agua': 0.00000,
+        'Ecotoxidade de Água Doce': 0.00097,
+        'Eutrofização de Água Doce': 0.00000,
+        'Aquecimento Global': 0.25056,
+        'Uso da Terra': 0.00142,
+        'Ecotoxidade Marinha': 0.00144,
+        'Eutrofização Marinha': 0.00,
+        'Ecotoxidade Terrestre': 0.28,
     },
     'cloreto_ferrico': {
-        'aquecimento_global': 0.05594,
-        'ecotoxidade_agua': 0.06756,
-        'eutrofizacao_agua': 1.09053,
+        'Ecotoxidade de Água Doce': 0.06756,
+        'Eutrofização de Água Doce': 1.09053,
+        'Aquecimento Global': 0.05594,
+        'Uso da Terra': 0.09093,
+        'Ecotoxidade Marinha': 0.00002,
+        'Eutrofização Marinha': 0.00,
+        'Ecotoxidade Terrestre': 5.87,
     },
     'sulfato_aluminio': {
-        'aquecimento_global': 0.35950,
-        'ecotoxidade_agua': 0.06946,
-        'eutrofizacao_agua': 0.00034,
+        'Ecotoxidade de Água Doce': 0.06946,
+        'Eutrofização de Água Doce': 0.00034,
+        'Aquecimento Global': 0.35950,
+        'Uso da Terra': 0.02799,
+        'Ecotoxidade Marinha': 0.09619,
+        'Eutrofização Marinha': 0.00,
+        'Ecotoxidade Terrestre': 6.44,
+    },
+    'area_utilizada': {
+        'Uso da Terra': 1.00,
+    },
+    'fosforo_total': {
+        'Eutrofização de Água Doce': 1.0000,
+    },
+    'nitrogenio_total': {
+        'Eutrofização Marinha': 0.297,
+    },
+    'metano': {
+        'Aquecimento Global': 34.0,
+    },
+    'oxido_nitroso': {
+        'Aquecimento Global': 298.0,
+    },
+    'dioxido_carbono': {
+        'Aquecimento Global': 1.00,
     },
 }
 
 IMPACT_NAMES = {
-    'aquecimento_global': "Aquecimento Global (kg CO2 eq)",
-    'ecotoxidade_agua': "Ecotoxidade de Água Doce (kg 1,4-DCB)",
-    'eutrofizacao_agua': "Eutrofização de Água Doce (kg P eq)",
+    'Ecotoxidade de Água Doce': "Ecotoxidade de Água Doce (kg 1,4-DCB)",
+    'Eutrofização de Água Doce': "Eutrofização de Água Doce (kg P eq)",
+    'Aquecimento Global': "Aquecimento Global (kg CO2 eq)",
+    'Uso da Terra': "Uso da Terra (m2a crop eq)",
+    'Ecotoxidade Marinha': "Ecotoxidade Marinha (kg 1,4-DCB)",
+    'Eutrofização Marinha': "Eutrofização Marinha (kg N eq)",
+    'Ecotoxidade Terrestre': "Ecotoxidade Terrestre (kg 1,4-DCB)",
 }
 
 def calculate_impacts(inputs):
@@ -114,9 +148,9 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
     
     col1, col2 = st.columns(2)
     with col1:
-        lodo_fosforo = st.number_input('Fósforo (kg/m³)', min_value=0.0, step=0.001)
+        inputs['lodo_fosforo'] = st.number_input('Fósforo (kg/m³)', min_value=0.0, step=0.001)
     with col2:
-        lodo_nitrogenio = st.number_input('Nitrogênio Amoniacal (kg/m³)', min_value=0.0, step=0.001)
+        inputs['lodo_nitrogenio'] = st.number_input('Nitrogênio Amoniacal (kg/m³)', min_value=0.0, step=0.001)
     
     st.write("Elementos adicionais (opcionais)")
     if st.checkbox('Mostrar mais elementos'):
@@ -137,26 +171,22 @@ tipo_queimador = st.selectbox(
 
 if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
     st.subheader('Emissões do Queimador Fechado')
-    inputs['dioxido_carbono_fechado'] = st.number_input('Dióxido de Carbono (kg/m³)', min_value=0.0, step=0.001)
+    inputs['dioxido_carbono'] = st.number_input('Dióxido de Carbono (kg/m³)', min_value=0.0, step=0.001)
 
 elif tipo_queimador == 'Queimador aberto':
     st.subheader('Emissões do Queimador Aberto')
     
     col1, col2 = st.columns(2)
     with col1:
-        inputs['metano_aberto'] = st.number_input('Metano (kg/m³)', min_value=0.0, step=0.001)
-        inputs['dioxido_carbono_aberto'] = st.number_input('Dióxido de Carbono (kg/m³)', min_value=0.0, step=0.001)
+        inputs['metano'] = st.number_input('Metano (kg/m³)', min_value=0.0, step=0.001)
+        inputs['dioxido_carbono'] = st.number_input('Dióxido de Carbono (kg/m³)', min_value=0.0, step=0.001)
     with col2:
-        inputs['nitrogenio_amoniacal_aberto'] = st.number_input('Nitrogênio Amoniacal (kg/m³)', min_value=0.0, step=0.001)
+        inputs['oxido_nitroso'] = st.number_input('Óxido Nitroso (kg/m³)', min_value=0.0, step=0.001)
 
 if st.button('Calcular Impactos'):
     # Adicione as informações do lodo aos inputs
     if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
         inputs['ton_km_factor_lodo'] = ton_km_factor_lodo
-        inputs['disposicao_lodo'] = disposicao_lodo
-    elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
-        inputs['lodo_fosforo'] = lodo_fosforo
-        inputs['lodo_nitrogenio'] = lodo_nitrogenio
         inputs['disposicao_lodo'] = disposicao_lodo
     
     # Adicione as informações do queimador aos inputs
@@ -167,11 +197,20 @@ if st.button('Calcular Impactos'):
     st.header('Resultados')
     
     # Criar um DataFrame para os resultados
-    df_results = pd.DataFrame(list(results.items()), columns=['Impacto', 'Valor'])
-    df_results['Impacto'] = df_results['Impacto'].map(IMPACT_NAMES)
+    df_results = pd.DataFrame(list(results.items()), columns=['Categoria de Impacto', 'Valor'])
+    df_results['Categoria de Impacto'] = df_results['Categoria de Impacto'].map(IMPACT_NAMES)
     
     # Criar gráfico de barras com Plotly
-    fig = px.bar(df_results, x='Impacto', y='Valor', title='Impactos Ambientais')
+    fig = px.bar(df_results, x='Categoria de Impacto', y='Valor', 
+                 title='Impactos Ambientais por Categoria',
+                 labels={'Valor': 'Impacto'},
+                 color='Categoria de Impacto')
+    
+    # Personalizar o layout do gráfico
+    fig.update_layout(xaxis_title="Categoria de Impacto",
+                      yaxis_title="Valor do Impacto",
+                      xaxis={'categoryorder':'total descending'})
+    
     st.plotly_chart(fig)
     
     # Mostrar resultados em formato de tabela
