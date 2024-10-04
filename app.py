@@ -127,6 +127,28 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
         for elemento in elementos_adicionais:
             inputs[f'lodo_{elemento.lower()}'] = st.number_input(f'{elemento} (kg/m³)', value=0.0, step=0.0001)
 
+# Passo 4: Queima de Biogás
+st.header('Passo 4: Queima de Biogás')
+
+tipo_queimador = st.selectbox(
+    'Escolha o tipo de queimador',
+    ['Queimador aberto', 'Queimador fechado com reaproveitamento energético']
+)
+
+if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
+    st.subheader('Emissões do Queimador Fechado')
+    inputs['dioxido_carbono_fechado'] = st.number_input('Dióxido de Carbono (kg/m³)', min_value=0.0, step=0.001)
+
+elif tipo_queimador == 'Queimador aberto':
+    st.subheader('Emissões do Queimador Aberto')
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        inputs['metano_aberto'] = st.number_input('Metano (kg/m³)', min_value=0.0, step=0.001)
+        inputs['dioxido_carbono_aberto'] = st.number_input('Dióxido de Carbono (kg/m³)', min_value=0.0, step=0.001)
+    with col2:
+        inputs['nitrogenio_amoniacal_aberto'] = st.number_input('Nitrogênio Amoniacal (kg/m³)', min_value=0.0, step=0.001)
+
 if st.button('Calcular Impactos'):
     # Adicione as informações do lodo aos inputs
     if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
@@ -136,6 +158,9 @@ if st.button('Calcular Impactos'):
         inputs['lodo_fosforo'] = lodo_fosforo
         inputs['lodo_nitrogenio'] = lodo_nitrogenio
         inputs['disposicao_lodo'] = disposicao_lodo
+    
+    # Adicione as informações do queimador aos inputs
+    inputs['tipo_queimador'] = tipo_queimador
     
     results = calculate_impacts(inputs)
     
