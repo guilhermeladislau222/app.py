@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Definição completa dos fatores de impacto baseados na tabela fornecida
+# Fatoresss para impactos
 IMPACT_FACTORS = {
     'eletricidade': {
         'Ecotoxidade de Água Doce': 0.00097,
@@ -256,7 +256,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está]
+# [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está, não se esqueçaaa
 
 def parse_scientific_notation(value):
     try:
@@ -281,7 +281,7 @@ st.title('Avaliação do Ciclo de Vida para ETE')
 # Passo 1: Processo de Tratamento
 st.header('Passo 1: Processo de Tratamento')
 
-# Tratamento Preliminar (obrigatório)
+# Tratamento Preliminar ( deve ser obrigatório)
 st.subheader('Tratamento Preliminar')
 st.write('O tratamento preliminar é obrigatório.')
 
@@ -298,18 +298,18 @@ st.info('Os impactos em cada categoria são diferentes de acordo com a destinaç
 ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2e}')
 
-# UASB (pré-selecionado)
+# UASB (deve ser pré-selecionado segundo o fernando)
 st.subheader('Tratamento UASB')
 st.write('O tratamento UASB está pré-selecionado.')
 
-# Processos adicionais
+# Processos adicionais 
 st.subheader('Processos Adicionais')
 additional_processes = st.multiselect(
     'Selecione o(s) Processo(s) Adicional(is)',
     ['Wetland de Fluxo Vertical', 'Filtro Biológico percolador + Decantador Segundario', 'Lagoa de Polimento']
 )
 
-# Passo 2: Inventário do ciclo de vida
+# Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
 st.header('Passo 2: Inventário do ciclo de vida')
 
 inputs = {}
@@ -330,7 +330,7 @@ if st.checkbox('Mostrar mais'):
     for param in optional_params:
         inputs[param.lower()] = number_input_scientific(f'{param} (kg/m³)', value=0.0, step=0.0001)
 
-# Passo 3: Disposição do Lodo
+# Passo 3: Disposição do Lodo   por categoria
 st.header('Passo 3: Disposição do Lodo')
 
 disposicao_lodo = st.selectbox(
@@ -368,7 +368,7 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
         for elemento in elementos_adicionais:
             inputs[f'lodo_{elemento.lower()}'] = number_input_scientific(f'{elemento} (kg/m³)', value=0.0, step=0.0001)
 
-# Passo 4: Queima de Biogás
+# Passo 4: Queima de Biogás# não esqueça as observações no video do fernando
 st.header('Passo 4: Queima de Biogás')
 
 tipo_queimador = st.selectbox(
@@ -413,7 +413,7 @@ if st.button('Calcular Impactos'):
                  labels={'Valor': 'Impacto'},
                  color='Categoria de Impacto')
     
-    # Personalizar o layout do gráfico
+    # Personalizar o layout do gráfico # veja as variavels possiveis na biblioteca
     fig.update_layout(xaxis_title="Categoria de Impacto",
                       yaxis_title="Valor do Impacto",
                       xaxis={'categoryorder':'total descending'})
