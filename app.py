@@ -251,10 +251,74 @@ IMPACT_NAMES = {
     'Eutrofização Marinha': "Eutrofização Marinha (kg N eq)",
     'Ecotoxidade Terrestre': "Ecotoxidade Terrestre (kg 1,4-DCB)",
 }
+# Adicione as novas funções aqui
+def group_parameters_by_category(inputs):
+    categories = {
+        'Emissões para a água': [
+            'fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio',
+            'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel'
+        ],
+        'Emissões para o solo (Lodo)': [
+            'lodo_fosforo', 'lodo_nitrogenio', 'lodo_arsenio', 'lodo_bario',
+            'lodo_cadmio', 'lodo_chumbo', 'lodo_cobre', 'lodo_cromo',
+            'lodo_molibdenio', 'lodo_niquel', 'lodo_estanho', 'lodo_zinco',
+            'lodo_diclorobenzeno'
+        ],
+        'Emissões para o ar': [
+            'metano', 'oxido_nitroso', 'nitrogenio_amoniacal', 'dioxido_carbono'
+        ],
+        'Resíduos': [
+            'residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao',
+            'lodo_aterro', 'lodo_lixao'
+        ],
+        'Transportes': [
+            'transportes'
+        ],
+        'Emissões evitadas': [
+            'eletricidade'
+        ]
+    }
+    
+    grouped_data = {}
+    for category, params in categories.items():
+        category_data = {param: inputs.get(param, 0) for param in params if inputs.get(param, 0) != 0}
+        if category_data:
+            grouped_data[category] = category_data
+            
+    return grouped_data
 
+def create_category_graphs(grouped_data):
+    graphs = []
+    for category, data in grouped_data.items():
+        if data:
+            df = pd.DataFrame(list(data.items()), columns=['Parâmetro', 'Valor'])
+            
+            fig = px.bar(
+                df,
+                x='Parâmetro',
+                y='Valor',
+                title=f'{category}',
+                labels={'Valor': 'Impacto'},
+                color='Parâmetro'
+            )
+            
+            fig.update_layout(
+                xaxis_title="Parâmetro",
+                yaxis_title="Valor",
+                xaxis={'categoryorder':'total descending'},
+                showlegend=False
+            )
+            
+            graphs.append(fig)
+    
+    return graphs
+
+def parse_scientific_notation(value):
+    
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+
 
 # [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está, não se esqueçaaa
 
@@ -406,6 +470,33 @@ if st.button('Calcular Impactos'):
     # Criar um DataFrame para os resultados
     df_results = pd.DataFrame(list(results.items()), columns=['Categoria de Impacto', 'Valor'])
     df_results['Categoria de Impacto'] = df_results['Categoria de Impacto'].map(IMPACT_NAMES)
+# Criar gráfico de barras com Plotly
+    fig = px.bar(df_results, x='Categoria de Impacto', y='Valor', 
+                 title='Impactos Ambientais por Categoria',
+                 labels={'Valor': 'Impacto'},
+                 color='Categoria de Impacto')
+    
+    # Personalizar o layout do gráfico
+    fig.update_layout(xaxis_title="Categoria de Impacto",
+                     yaxis_title="Valor do Impacto",
+                     xaxis={'categoryorder':'total descending'})
+    
+    st.plotly_chart(fig)
+    
+    # Mostrar resultados em formato de tabela
+    st.table(df_results)
+    
+    # Adicionar os novos gráficos por categoria
+    st.header('Gráficos por Categoria de Emissão')
+    
+    grouped_data = group_parameters_by_category(inputs)
+    category_graphs = create_category_graphs(grouped_data)
+    
+    # Exibir os gráficos em duas colunas
+    cols = st.columns(2)
+    for i, fig in enumerate(category_graphs):
+        with cols[i % 2]:
+            st.plotly_chart(fig, use_container_width=True)
     
     # Criar gráfico de barras com Plotly
     fig = px.bar(df_results, x='Categoria de Impacto', y='Valor', 
