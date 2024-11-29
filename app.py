@@ -314,11 +314,10 @@ def create_category_graphs(grouped_data):
     return graphs
 
 def parse_scientific_notation(value):
-    
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-
+    try:
+        return float(value)
+    except ValueError:
+        return 0.0
 
 # [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está, não se esqueçaaa
 
@@ -470,21 +469,6 @@ if st.button('Calcular Impactos'):
     # Criar um DataFrame para os resultados
     df_results = pd.DataFrame(list(results.items()), columns=['Categoria de Impacto', 'Valor'])
     df_results['Categoria de Impacto'] = df_results['Categoria de Impacto'].map(IMPACT_NAMES)
-# Criar gráfico de barras com Plotly
-    fig = px.bar(df_results, x='Categoria de Impacto', y='Valor', 
-                 title='Impactos Ambientais por Categoria',
-                 labels={'Valor': 'Impacto'},
-                 color='Categoria de Impacto')
-    
-    # Personalizar o layout do gráfico
-    fig.update_layout(xaxis_title="Categoria de Impacto",
-                     yaxis_title="Valor do Impacto",
-                     xaxis={'categoryorder':'total descending'})
-    
-    st.plotly_chart(fig)
-    
-    # Mostrar resultados em formato de tabela
-    st.table(df_results)
     
     # Adicionar os novos gráficos por categoria
     st.header('Gráficos por Categoria de Emissão')
