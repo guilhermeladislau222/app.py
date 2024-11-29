@@ -422,15 +422,8 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
     with col2:
         inputs['lodo_nitrogenio'] = number_input_scientific('Nitrogênio Amoniacal (kg/m³)', value=0.0, step=0.001)
     
-    st.write("Elementos adicionais (opcionais)")
-    if st.checkbox('Mostrar mais elementos'):
-        elementos_adicionais = [
-            'Arsênio', 'Bário', 'Cádmio', 'Chumbo', 'Cobre', 'Cromo',
-            'Molibdênio', 'Níquel', 'Estanho', 'Zinco', '1,4-Diclorobenzeno'
-        ]
-        for elemento in elementos_adicionais:
-            inputs[f'lodo_{elemento.lower()}'] = number_input_scientific(f'{elemento} (kg/m³)', value=0.0, step=0.0001)
-
+     st.write("Elementos adicionais (opcionais)")
+    if st.checkbox
 # Passo 4: Queima de Biogás# não esqueça as observações no video do fernando
 st.header('Passo 4: Queima de Biogás')
 
