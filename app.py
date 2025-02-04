@@ -285,6 +285,13 @@ def calculate_impacts(inputs):
         for impact, factor in impacts.items():
             results[impact] += inputs['quantity'] * factor
     
+    # Processando transporte de resíduos
+    if 'transportes' in inputs:
+        for impact, factor in IMPACT_FACTORS['transportes'].items():
+            results[impact] += inputs['transportes'] * factor
+    
+    # ... resto da função continua igual ...
+    
     # Processando Lodo
     if 'disposicao_lodo' in inputs:
         if inputs['disposicao_lodo'] == 'Disposição em aterro':
@@ -345,6 +352,8 @@ st.info('Os impactos em cada categoria são diferentes de acordo com a destinaç
 ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2e}')
 inputs['transportes'] = ton_km_factor
+inputs['quantity'] = quantity  # Adicionando quantidade aos inputs
+inputs['destination'] = destination  # Adicionando destino aos inputs
 
 # UASB (deve ser pré-selecionado segundo o fernando)
 st.subheader('Tratamento UASB')
