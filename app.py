@@ -253,6 +253,15 @@ IMPACT_NAMES = {
 }
 # Logo após os imports e definições de IMPACT_FACTORS e IMPACT_NAMES, 
 # e antes de começar a interface do usuário:
+def parse_scientific_notation(value):
+    try:
+        return float(value)
+    except ValueError:
+        return 0.0
+
+def number_input_scientific(label, value=0.0, step=0.1):
+    value_input = st.text_input(label, value=str(value))
+    return parse_scientific_notation(value_input)
 
 st.title('Avaliação do Ciclo de Vida para ETE')
 
@@ -280,23 +289,8 @@ st.write(f'Fator ton.km: {ton_km_factor:.2e}')
 inputs['transportes'] = ton_km_factor
 # Adicione as novas funções aqui
 
-def parse_scientific_notation(value):
-    try:
-        return float(value)
-    except ValueError:
-        return 0.0
 
-# [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está, não se esqueçaaa
 
-def parse_scientific_notation(value):
-    try:
-        return float(value)
-    except ValueError:
-        return 0.0
-
-def number_input_scientific(label, value=0.0, step=0.1):
-    value_input = st.text_input(label, value=str(value))
-    return parse_scientific_notation(value_input)
 
 def calculate_impacts(inputs):
     results = {impact: 0 for impact in IMPACT_NAMES}
