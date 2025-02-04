@@ -285,12 +285,16 @@ def calculate_impacts(inputs):
         for impact, factor in impacts.items():
             results[impact] += inputs['quantity'] * factor
     
-    # Processando transporte de resíduos do tratamento preliminar
-    if 'transportes_residuos_preliminar' in inputs and inputs['transportes_residuos_preliminar'] > 0:
-        transport_impacts = IMPACT_FACTORS['transportes']
-        for impact, factor in transport_impacts.items():
-            results[impact] += inputs['transportes_residuos_preliminar'] * factor
+    # Processando transporte de resíduos preliminar
+    if 'transportes' in inputs and inputs['transportes'] > 0:
+        for impact, factor in IMPACT_FACTORS['transportes'].items():
+            results[impact] += inputs['transportes'] * factor
     
+    # Processando transporte de lodo
+    if 'transportes_lodo' in inputs and inputs['transportes_lodo'] > 0:
+        for impact, factor in IMPACT_FACTORS['transportes'].items():
+            results[impact] += inputs['transportes_lodo'] * factor
+            
     # Processando Lodo
     if 'disposicao_lodo' in inputs:
         if inputs['disposicao_lodo'] == 'Disposição em aterro':
@@ -301,6 +305,7 @@ def calculate_impacts(inputs):
         if 'quantidade_lodo' in inputs:
             for impact, factor in lodo_impacts.items():
                 results[impact] += inputs['quantidade_lodo'] * factor
+    
     
     # Processando emissões para água
     water_emissions = ['bario', 'selenio', 'cadmio', 'niquel']
@@ -352,10 +357,9 @@ ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2e}')
 
 # Salvando todas as informações relevantes nos inputs
+inputs['transportes'] = ton_km_factor  # Impacto do transporte de resíduos preliminar
 inputs['quantity'] = quantity
 inputs['destination'] = destination
-inputs['distance'] = distance
-inputs['transportes_residuos_preliminar'] = ton_km_factor  # Novo nome para evitar conflito
 
 # UASB (deve ser pré-selecionado segundo o fernando)
 st.subheader('Tratamento UASB')
@@ -406,6 +410,9 @@ if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
     
     ton_km_factor_lodo = distancia_lodo * quantidade_lodo
     st.write(f'Fator ton.km para o lodo: {ton_km_factor_lodo:.2e}')
+    
+    inputs['transportes_lodo'] = ton_km_factor_lodo  # Impacto do transporte do lodo
+    inputs['quantidade_lodo'] = quantidade_lodo
 
 elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
     st.subheader('Composição do Lodo')
@@ -451,12 +458,9 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
 
 if st.button('Calcular Impactos'):
-    # Adicione as informações do lodo aos inputs
     if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
-        inputs['ton_km_factor_lodo'] = ton_km_factor_lodo
         inputs['disposicao_lodo'] = disposicao_lodo
     
-    # Adicione as informações do queimador aos inputs
     inputs['tipo_queimador'] = tipo_queimador
     
     results = calculate_impacts(inputs)
