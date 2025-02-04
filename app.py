@@ -251,6 +251,33 @@ IMPACT_NAMES = {
     'Eutrofização Marinha': "Eutrofização Marinha (kg N eq)",
     'Ecotoxidade Terrestre': "Ecotoxidade Terrestre (kg 1,4-DCB)",
 }
+# Logo após os imports e definições de IMPACT_FACTORS e IMPACT_NAMES, 
+# e antes de começar a interface do usuário:
+
+st.title('Avaliação do Ciclo de Vida para ETE')
+
+# Inicializar o dicionário de inputs no início
+inputs = {}
+
+# Tratamento Preliminar (obrigatório)
+st.header('Passo 1: Processo de Tratamento')
+st.subheader('Tratamento Preliminar')
+st.write('O tratamento preliminar é obrigatório.')
+
+col1, col2 = st.columns(2)
+with col1:
+    distance = number_input_scientific('Distância para o transporte de resíduos (Ida e Volta) (km)', value=0.0, step=0.1)
+    quantity = number_input_scientific('Quantidade de resíduos (ton/m³)', value=0.0, step=0.001)
+with col2:
+    destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'])
+
+st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
+st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
+
+# Cálculo do fator ton.km e adição aos inputs
+ton_km_factor = distance * quantity
+st.write(f'Fator ton.km: {ton_km_factor:.2e}')
+inputs['transportes'] = ton_km_factor
 # Adicione as novas funções aqui
 
 def parse_scientific_notation(value):
