@@ -265,25 +265,31 @@ def number_input_scientific(label, value=0.0, step=0.1):
 def calculate_impacts(inputs):
     results = {impact: 0 for impact in IMPACT_NAMES}
     
-    # Processando entradas básicas
-    for input_name, value in inputs.items():
-        if input_name in IMPACT_FACTORS:
-            for impact, factor in IMPACT_FACTORS[input_name].items():
-                results[impact] += value * factor
+    # Print para debug
+    st.write("Debug - Inputs recebidos na função calculate_impacts:", inputs)
     
-    # Processando Uso da Terra
-    if 'area_utilizada' in inputs:
-        results['Uso da Terra'] += inputs['area_utilizada'] * IMPACT_FACTORS['uso_terra']['Uso da Terra']
+    # Processando transporte de resíduos preliminar
+    if 'transportes' in inputs and inputs['transportes'] > 0:
+        st.write("Debug - Calculando impacto do transporte")
+        st.write("Valor do transporte:", inputs['transportes'])
+        transport_impacts = IMPACT_FACTORS['transportes']
+        for impact, factor in transport_impacts.items():
+            valor = inputs['transportes'] * factor
+            results[impact] += valor
+            st.write(f"Debug - Impacto {impact}: {valor}")
     
     # Processando Disposição de Resíduos do Tratamento Preliminar
     if 'quantity' in inputs and 'destination' in inputs:
+        st.write("Debug - Calculando impacto da disposição")
         if inputs['destination'] == 'Aterro Sanitário':
             impacts = IMPACT_FACTORS['residuos_trat_preliminar_aterro']
         else:  # Lixão
             impacts = IMPACT_FACTORS['residuos_trat_preliminar_lixao']
         
         for impact, factor in impacts.items():
-            results[impact] += inputs['quantity'] * factor
+            valor = inputs['quantity'] * factor
+            results[impact] += valor
+            st.write(f"Debug - Impacto {impact}: {valor}")
     
     # Processando transporte de resíduos preliminar
     if 'transportes' in inputs and inputs['transportes'] > 0:
@@ -352,9 +358,17 @@ with col2:
 st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
 st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
 
+
 # Cálculo do fator ton.km e adição aos inputs
+# No tratamento preliminar, após coletar os valores:
 ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2e}')
+inputs['transportes'] = ton_km_factor
+inputs['quantity'] = quantity
+inputs['destination'] = destination
+
+# Adicione este print para debug
+st.write("Debug - Valores dos inputs:", inputs)
 
 # Salvando todas as informações relevantes nos inputs
 inputs['transportes'] = ton_km_factor  # Impacto do transporte de resíduos preliminar
