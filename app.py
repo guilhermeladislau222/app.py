@@ -369,8 +369,6 @@ additional_processes = st.multiselect(
 # Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
 st.header('Passo 2: Inventário do ciclo de vida')
 
-inputs = {}
-
 st.subheader('Consumo de Energia')
 inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1)
 
