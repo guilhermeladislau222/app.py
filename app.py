@@ -284,12 +284,6 @@ def calculate_impacts(inputs):
     if 'area_utilizada' in inputs:
         results['Uso da Terra'] += inputs['area_utilizada'] * IMPACT_FACTORS['uso_terra']['Uso da Terra']
     
-    # Processando Transporte de Resíduos do Tratamento Preliminar
-    if 'ton_km_factor' in inputs:
-        transport_impacts = IMPACT_FACTORS['transportes']
-        for impact, factor in transport_impacts.items():
-            results[impact] += inputs['ton_km_factor'] * factor
-    
     # Processando Disposição de Resíduos do Tratamento Preliminar
     if 'quantity' in inputs and 'destination' in inputs:
         if inputs['destination'] == 'Aterro Sanitário':
@@ -341,7 +335,7 @@ st.title('Avaliação do Ciclo de Vida para ETE')
 # Passo 1: Processo de Tratamento
 st.header('Passo 1: Processo de Tratamento')
 
-# Tratamento Preliminar ( deve ser obrigatório)
+# Tratamento Preliminar (obrigatório)
 st.subheader('Tratamento Preliminar')
 st.write('O tratamento preliminar é obrigatório.')
 
@@ -355,8 +349,10 @@ with col2:
 st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
 st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
 
+# Cálculo do fator ton.km e adição aos inputs
 ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2e}')
+inputs['transportes'] = ton_km_factor  # Adiciona diretamente aos inputs
 
 # UASB (deve ser pré-selecionado segundo o fernando)
 st.subheader('Tratamento UASB')
