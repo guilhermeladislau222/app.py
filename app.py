@@ -472,12 +472,14 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
 
 if st.button('Calcular Impactos'):
-    if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
-        inputs['disposicao_lodo'] = disposicao_lodo
+    # Debug dos valores antes do cálculo
+    st.write("Debug - Valores antes do cálculo:", inputs)
     
-    inputs['tipo_queimador'] = tipo_queimador
-    
+    # Calcular impactos
     results = calculate_impacts(inputs)
+    
+    # Debug dos resultados
+    st.write("Debug - Resultados calculados:", results)
     
     st.header('Resultados')
     
