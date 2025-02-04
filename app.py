@@ -473,25 +473,13 @@ if st.button('Calcular Impactos'):
     df_results = pd.DataFrame(list(results.items()), columns=['Categoria de Impacto', 'Valor'])
     df_results['Categoria de Impacto'] = df_results['Categoria de Impacto'].map(IMPACT_NAMES)
     
-    # Adicionar os novos gráficos por categoria
-    st.header('Gráficos por Categoria de Emissão')
-    
-    grouped_data = group_parameters_by_category(inputs)
-    category_graphs = create_category_graphs(grouped_data)
-    
-    # Exibir os gráficos em duas colunas
-    cols = st.columns(2)
-    for i, fig in enumerate(category_graphs):
-        with cols[i % 2]:
-            st.plotly_chart(fig, use_container_width=True)
-    
     # Criar gráfico de barras com Plotly
     fig = px.bar(df_results, x='Categoria de Impacto', y='Valor', 
                  title='Impactos Ambientais por Categoria',
                  labels={'Valor': 'Impacto'},
                  color='Categoria de Impacto')
     
-    # Personalizar o layout do gráfico # veja as variavels possiveis na biblioteca
+    # Personalizar o layout do gráfico
     fig.update_layout(xaxis_title="Categoria de Impacto",
                       yaxis_title="Valor do Impacto",
                       xaxis={'categoryorder':'total descending'})
