@@ -389,7 +389,7 @@ inputs['nitrogenio_total'] = number_input_scientific('Nitrogênio Total (kg/m³)
 
 st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
 if st.checkbox('Mostrar mais'):
-    optional_params = ['bario', 'Cobre', 'Selênio', 'Zinco', 'Tolueno', 'Cromo', 'Cádmio', 'Chumbo', 'Níquel']
+    optional_params = ['bario', 'Cobre', 'selenio', 'Zinco', 'Tolueno', 'Cromo', 'Cadmio', 'Chumbo', 'Niquel']
     for param in optional_params:
         inputs[param.lower()] = number_input_scientific(f'{param} (kg/m³)', value=0.0, step=0.0001)
 
