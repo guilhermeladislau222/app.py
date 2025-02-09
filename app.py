@@ -389,7 +389,7 @@ inputs['nitrogenio_total'] = number_input_scientific('Nitrogênio Total (kg/m³)
 
 st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
 if st.checkbox('Mostrar mais'):
-    optional_params = ['Bário', 'Cobre', 'Selênio', 'Zinco', 'Tolueno', 'Cromo', 'Cádmio', 'Chumbo', 'Níquel']
+    optional_params = ['bario', 'Cobre', 'Selênio', 'Zinco', 'Tolueno', 'Cromo', 'Cádmio', 'Chumbo', 'Níquel']
     for param in optional_params:
         inputs[param.lower()] = number_input_scientific(f'{param} (kg/m³)', value=0.0, step=0.0001)
 
@@ -425,7 +425,7 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
     st.write("Elementos adicionais (opcionais)")
     if st.checkbox('Mostrar elementos do lodo'): # Nome alterado do checkbox
         elementos_adicionais = [
-            'Arsênio', 'Bário', 'Cádmio', 'Chumbo', 'Cobre', 'Cromo',
+            'Arsênio', 'bario', 'Cádmio', 'Chumbo', 'Cobre', 'Cromo',
             'Molibdênio', 'Níquel', 'Estanho', 'Zinco', '1,4-Diclorobenzeno'
         ]
         for elemento in elementos_adicionais:
