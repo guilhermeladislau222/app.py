@@ -332,11 +332,7 @@ def number_input_scientific(label, value=0.0, step=0.1):
     return parse_scientific_notation(value_input)
 
 def calculate_impacts(inputs):
-  # Processamento especial para área utilizada
-    if 'area_utilizada' in inputs:
-        results['Uso da Terra'] += inputs['area_utilizada'] * IMPACT_FACTORS['uso_terra']['Uso da Terra']
-    
-    # Processamento normal para outros parâmetros
+    results = {impact: 0 for impact in IMPACT_NAMES}
     for input_name, value in inputs.items():
         if input_name in IMPACT_FACTORS:
             for impact, factor in IMPACT_FACTORS[input_name].items():
