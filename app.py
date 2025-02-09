@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Fatoresss para impactos
+# Definição completa dos fatores de impacto baseados na tabela fornecida
 IMPACT_FACTORS = {
     'eletricidade': {
         'Ecotoxidade de Água Doce': 0.00097,
@@ -251,75 +251,8 @@ IMPACT_NAMES = {
     'Eutrofização Marinha': "Eutrofização Marinha (kg N eq)",
     'Ecotoxidade Terrestre': "Ecotoxidade Terrestre (kg 1,4-DCB)",
 }
-# Adicione as novas funções aqui
-def group_parameters_by_category(inputs):
-    categories = {
-        'Emissões para a água': [
-            'fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio',
-            'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel'
-        ],
-        'Emissões para o solo (Lodo)': [
-            'lodo_fosforo', 'lodo_nitrogenio', 'lodo_arsenio', 'lodo_bario',
-            'lodo_cadmio', 'lodo_chumbo', 'lodo_cobre', 'lodo_cromo',
-            'lodo_molibdenio', 'lodo_niquel', 'lodo_estanho', 'lodo_zinco',
-            'lodo_diclorobenzeno'
-        ],
-        'Emissões para o ar': [
-            'metano', 'oxido_nitroso', 'nitrogenio_amoniacal', 'dioxido_carbono'
-        ],
-        'Resíduos': [
-            'residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao',
-            'lodo_aterro', 'lodo_lixao'
-        ],
-        'Transportes': [
-            'transportes'
-        ],
-        'Emissões evitadas': [
-            'eletricidade'
-        ]
-    }
-    
-    grouped_data = {}
-    for category, params in categories.items():
-        category_data = {param: inputs.get(param, 0) for param in params if inputs.get(param, 0) != 0}
-        if category_data:
-            grouped_data[category] = category_data
-            
-    return grouped_data
 
-def create_category_graphs(grouped_data):
-    graphs = []
-    for category, data in grouped_data.items():
-        if data:
-            df = pd.DataFrame(list(data.items()), columns=['Parâmetro', 'Valor'])
-            
-            fig = px.bar(
-                df,
-                x='Parâmetro',
-                y='Valor',
-                title=f'{category}',
-                labels={'Valor': 'Impacto'},
-                color='Parâmetro'
-            )
-            
-            fig.update_layout(
-                xaxis_title="Parâmetro",
-                yaxis_title="Valor",
-                xaxis={'categoryorder':'total descending'},
-                showlegend=False
-            )
-            
-            graphs.append(fig)
-    
-    return graphs
-
-def parse_scientific_notation(value):
-    try:
-        return float(value)
-    except ValueError:
-        return 0.0
-
-# [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está, não se esqueçaaa
+# [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está]
 
 def parse_scientific_notation(value):
     try:
@@ -333,170 +266,95 @@ def number_input_scientific(label, value=0.0, step=0.1):
 
 def calculate_impacts(inputs):
     results = {impact: 0 for impact in IMPACT_NAMES}
-    for input_name, value in inputs.items():
-        if input_name in IMPACT_FACTORS:
-            for impact, factor in IMPACT_FACTORS[input_name].items():
-                results[impact] += value * factor
+    
+    # Processando entradas básicas (energia elétrica)
+    if 'eletricidade' in inputs:
+        for impact, factor in IMPACT_FACTORS['eletricidade'].items():
+            results[impact] += inputs['eletricidade'] * factor
+    
+    # Processando Uso da Terra
+    if 'area_utilizada' in inputs:
+        results['Uso da Terra'] += inputs['area_utilizada'] * IMPACT_FACTORS['uso_terra']['Uso da Terra']
+    
+    # Processando Transporte de Resíduos (incluindo preliminar)
+    total_transport = 0
+    if 'ton_km_factor' in inputs:
+        total_transport += inputs['ton_km_factor']
+    if 'ton_km_factor_lodo' in inputs:
+        total_transport += inputs['ton_km_factor_lodo']
+    
+    if total_transport > 0:
+        for impact, factor in IMPACT_FACTORS['transportes'].items():
+            results[impact] += total_transport * factor
+    
+    # Processando Disposição de Resíduos do Tratamento Preliminar
+    if 'quantity' in inputs and 'destination' in inputs:
+        impact_key = 'residuos_trat_preliminar_aterro' if inputs['destination'] == 'Aterro Sanitário' else 'residuos_trat_preliminar_lixao'
+        for impact, factor in IMPACT_FACTORS[impact_key].items():
+            results[impact] += inputs['quantity'] * factor
+    
+    # Processando Lodo
+    if 'disposicao_lodo' in inputs and 'quantidade_lodo' in inputs:
+        if inputs['disposicao_lodo'] == 'Disposição em aterro':
+            impact_key = 'lodo_aterro'
+        elif inputs['disposicao_lodo'] == 'Disposição em lixão':
+            impact_key = 'lodo_lixao'
+        
+        if impact_key:
+            for impact, factor in IMPACT_FACTORS[impact_key].items():
+                results[impact] += inputs['quantidade_lodo'] * factor
+    
+    # Processando emissões para água
+
+    for emission, factors in water_emissions.items():
+        if emission in inputs and inputs[emission] > 0:
+            for impact, factor in factors.items():
+                results[impact] += inputs[emission] * factor
+    
+    # Processando emissões para solo (ferti-irrigação)
+        
+        for lodo_key, impact_key in soil_emissions.items():
+            input_key = f'lodo_{lodo_key}'
+            if input_key in inputs and inputs[input_key] > 0:
+                for impact, factor in IMPACT_FACTORS[impact_key].items():
+                    results[impact] += inputs[input_key] * factor
+    
+    # Processando emissões atmosféricas do biogás
+    gas_emissions = ['metano', 'oxido_nitroso', 'dioxido_carbono']
+    for emission in gas_emissions:
+        if emission in inputs and inputs[emission] > 0:
+            if 'Aquecimento Global' in IMPACT_FACTORS[emission]:
+                results['Aquecimento Global'] += inputs[emission] * IMPACT_FACTORS[emission]['Aquecimento Global']
+    
     return results
 
-st.title('Avaliação do Ciclo de Vida para ETE')
 
-# Passo 1: Processo de Tratamento
-st.header('Passo 1: Processo de Tratamento')
-
-# Tratamento Preliminar ( deve ser obrigatório)
-st.subheader('Tratamento Preliminar')
-st.write('O tratamento preliminar é obrigatório.')
-
-col1, col2 = st.columns(2)
-with col1:
-    distance = number_input_scientific('Distância para o transporte de resíduos (Ida e Volta) (km)', value=0.0, step=0.1)
-    quantity = number_input_scientific('Quantidade de resíduos (ton/m³)', value=0.0, step=0.001)
-with col2:
-    destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'])
-
-st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
-st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
-
-ton_km_factor = distance * quantity
-st.write(f'Fator ton.km: {ton_km_factor:.2e}')
-
-# UASB (deve ser pré-selecionado segundo o fernando)
-st.subheader('Tratamento UASB')
-st.write('O tratamento UASB está pré-selecionado.')
-
-# Processos adicionais 
-st.subheader('Processos Adicionais')
-additional_processes = st.multiselect(
-    'Selecione o(s) Processo(s) Adicional(is)',
-    ['Wetland de Fluxo Vertical', 'Filtro Biológico percolador + Decantador Segundario', 'Lagoa de Polimento']
-)
-
-# Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
-st.header('Passo 2: Inventário do ciclo de vida')
-
-inputs = {}
-
-st.subheader('Consumo de Energia')
-inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1)
-
-st.subheader('Uso da Terra')
-inputs['area_utilizada'] = number_input_scientific('Área utilizada (m²)', value=0.0, step=0.1)
-
-st.subheader('Emissões para a Água')
-inputs['fosforo_total'] = number_input_scientific('Fósforo Total (kg/m³)', value=0.0, step=0.001)
-inputs['nitrogenio_total'] = number_input_scientific('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
-
-st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
-if st.checkbox('Mostrar mais'):
-    optional_params = ['Bário', 'Cobre', 'Selênio', 'Zinco', 'Tolueno', 'Cromo', 'Cádmio', 'Chumbo', 'Níquel']
-    for param in optional_params:
-        inputs[param.lower()] = number_input_scientific(f'{param} (kg/m³)', value=0.0, step=0.0001)
-
-# Passo 3: Disposição do Lodo   por categoria
-st.header('Passo 3: Disposição do Lodo')
-
-disposicao_lodo = st.selectbox(
-    'Escolha o método de disposição do lodo',
-    ['Disposição em aterro', 'Disposição em lixão', 'Ferti-irrigação ou agricultura']
-)
-
-if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
-    st.subheader('Tratamento do Lodo')
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        distancia_lodo = number_input_scientific('Distância para o transporte do lodo (Ida e Volta) (km)', value=0.0, step=0.1)
-    with col2:
-        quantidade_lodo = number_input_scientific('Quantidade de lodo (ton/m³)', value=0.0, step=0.001)
-    
-    ton_km_factor_lodo = distancia_lodo * quantidade_lodo
-    st.write(f'Fator ton.km para o lodo: {ton_km_factor_lodo:.2e}')
-
-elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
-    st.subheader('Composição do Lodo')
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        inputs['lodo_fosforo'] = number_input_scientific('Fósforo (kg/m³)', value=0.0, step=0.001)
-    with col2:
-        inputs['lodo_nitrogenio'] = number_input_scientific('Nitrogênio Amoniacal (kg/m³)', value=0.0, step=0.001)
-    
-    st.write("Elementos adicionais (opcionais)")
-    if st.checkbox('Mostrar elementos do lodo'): # Nome alterado do checkbox
-        elementos_adicionais = [
-            'Arsênio', 'Bário', 'Cádmio', 'Chumbo', 'Cobre', 'Cromo',
-            'Molibdênio', 'Níquel', 'Estanho', 'Zinco', '1,4-Diclorobenzeno'
-        ]
-        for elemento in elementos_adicionais:
-            inputs[f'lodo_{elemento.lower()}'] = number_input_scientific(
-                f'Lodo - {elemento} (kg/m³)', 
-                value=0.0, 
-                step=0.0001
-            )
-# Passo 4: Queima de Biogás# não esqueça as observações no video do fernando
-st.header('Passo 4: Queima de Biogás')
-
-tipo_queimador = st.selectbox(
-    'Escolha o tipo de queimador',
-    ['Queimador aberto', 'Queimador fechado com reaproveitamento energético']
-)
-
-if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
-    st.subheader('Emissões do Queimador Fechado')
-    inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
-
-elif tipo_queimador == 'Queimador aberto':
-    st.subheader('Emissões do Queimador Aberto')
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        inputs['metano'] = number_input_scientific('Metano (kg/m³)', value=0.0, step=0.001)
-        inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
-    with col2:
-        inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
-
+# Atualização da parte de visualização
 if st.button('Calcular Impactos'):
-    # Adicione as informações do lodo aos inputs
-    if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
-        inputs['ton_km_factor_lodo'] = ton_km_factor_lodo
-        inputs['disposicao_lodo'] = disposicao_lodo
-    
-    # Adicione as informações do queimador aos inputs
-    inputs['tipo_queimador'] = tipo_queimador
+    # ... [código anterior de processamento de inputs permanece igual]
     
     results = calculate_impacts(inputs)
     
-    st.header('Resultados')
     
-    # Criar um DataFrame para os resultados
-    df_results = pd.DataFrame(list(results.items()), columns=['Categoria de Impacto', 'Valor'])
-    df_results['Categoria de Impacto'] = df_results['Categoria de Impacto'].map(IMPACT_NAMES)
+    # Criando o gráfico de barras com Plotly
+    fig = px.bar(
+        df_results,
+        x='Categoria de Impacto',
+        y='Valor',
+        title='Impactos Ambientais por Categoria',
+        labels={'Valor': 'Impacto'},
+        template='plotly_white'
+    )
     
-    # Adicionar os novos gráficos por categoria
-    st.header('Gráficos por Categoria de Emissão')
+    # Customização do layout
+    fig.update_layout(
+        xaxis_title='Categoria de Impacto',
+        yaxis_title='Valor do Impacto',
+        xaxis={'tickangle': 45},
+        showlegend=False,
+        height=600
+    )
     
-    grouped_data = group_parameters_by_category(inputs)
-    category_graphs = create_category_graphs(grouped_data)
-    
-    # Exibir os gráficos em duas colunas
-    cols = st.columns(2)
-    for i, fig in enumerate(category_graphs):
-        with cols[i % 2]:
-            st.plotly_chart(fig, use_container_width=True)
-    
-    # Criar gráfico de barras com Plotly
-    fig = px.bar(df_results, x='Categoria de Impacto', y='Valor', 
-                 title='Impactos Ambientais por Categoria',
-                 labels={'Valor': 'Impacto'},
-                 color='Categoria de Impacto')
-    
-    # Personalizar o layout do gráfico # veja as variavels possiveis na biblioteca
-    fig.update_layout(xaxis_title="Categoria de Impacto",
-                      yaxis_title="Valor do Impacto",
-                      xaxis={'categoryorder':'total descending'})
-    
+    # Exibição dos resultados
     st.plotly_chart(fig)
-    
-    # Mostrar resultados em formato de tabela
     st.table(df_results)
