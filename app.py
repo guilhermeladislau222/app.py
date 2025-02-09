@@ -381,7 +381,7 @@ st.subheader('Consumo de Energia')
 inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1)
 
 st.subheader('Uso da Terra')
-inputs['area_utilizada'] = number_input_scientific('Área utilizada (m²)', value=0.0, step=0.1)
+inputs['uso_terra'] = number_input_scientific('Área utilizada (m²)', value=0.0, step=0.1)
 
 st.subheader('Emissões para a Água')
 inputs['fosforo_total'] = number_input_scientific('Fósforo Total (kg/m³)', value=0.0, step=0.001)
