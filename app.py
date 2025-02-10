@@ -353,6 +353,11 @@ def calculate_impacts(inputs):
             for impact, factor in IMPACT_FACTORS[impact_key].items():
                 results[impact] += inputs['quantidade_lodo'] * factor
     
+        # Adicionar impacto do transporte do lodo
+        if 'ton_km_factor_lodo' in inputs and inputs['ton_km_factor_lodo'] > 0:
+            for impact, factor in IMPACT_FACTORS['transportes'].items():
+                results[impact] += inputs['ton_km_factor_lodo'] * factor
+    
     return results
 
 st.title('Avaliação do Ciclo de Vida para ETE')
@@ -475,13 +480,9 @@ elif tipo_queimador == 'Queimador aberto':
 if st.button('Calcular Impactos'):
     # Adicionar informações do lodo
     if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
-        inputs['disposicao_lodo'] = disposicao_lodo  # Tipo de disposição
-        inputs['quantidade_lodo'] = quantidade_lodo   # Quantidade de lodo
-        
-        # Incluir o transporte do lodo
-        if ton_km_factor_lodo > 0:
-            for impact, factor in IMPACT_FACTORS['transportes'].items():
-                results[impact] += ton_km_factor_lodo * factor
+        inputs['disposicao_lodo'] = disposicao_lodo
+        inputs['quantidade_lodo'] = quantidade_lodo
+        inputs['ton_km_factor_lodo'] = ton_km_factor_lodo  # Adiciona o fator de transporte
     
     # Adicione as informações do queimador aos inputs
     inputs['tipo_queimador'] = tipo_queimador
