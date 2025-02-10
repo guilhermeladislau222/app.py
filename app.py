@@ -356,22 +356,33 @@ def calculate_impacts(inputs):
                 results[impact] += inputs['ton_km_factor'] * factor
 
     # Processamento específico para disposição do lodo
-    if 'disposicao_lodo' in inputs and 'quantidade_lodo' in inputs:
-        # Determina qual fator usar baseado no tipo de disposição
+    if 'disposicao_lodo' in inputs:
         if inputs['disposicao_lodo'] == 'Disposição em aterro':
             impact_key = 'lodo_aterro'
+            if 'quantidade_lodo' in inputs:
+                for impact, factor in IMPACT_FACTORS[impact_key].items():
+                    results[impact] += inputs['quantidade_lodo'] * factor
+        
         elif inputs['disposicao_lodo'] == 'Disposição em lixão':
             impact_key = 'lodo_lixao'
-
-        # Aplica os fatores de impacto do lodo
-        if impact_key:
-            for impact, factor in IMPACT_FACTORS[impact_key].items():
-                results[impact] += inputs['quantidade_lodo'] * factor
-
-        # Adiciona impacto do transporte do lodo
-        if 'ton_km_factor_lodo' in inputs and inputs['ton_km_factor_lodo'] > 0:
-            for impact, factor in IMPACT_FACTORS['transportes'].items():
-                results[impact] += inputs['ton_km_factor_lodo'] * factor
+            if 'quantidade_lodo' in inputs:
+                for impact, factor in IMPACT_FACTORS[impact_key].items():
+                    results[impact] += inputs['quantidade_lodo'] * factor
+        
+        elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
+            # Processa cada elemento do lodo na ferti-irrigação
+            elementos_lodo = [
+                'fosforo', 'nitrogenio', 'arsenio', 'bario', 'cadmio',
+                'chumbo', 'cobre', 'cromo', 'niquel', 'estanho',
+                'zinco', 'diclorobenzeno'
+            ]
+            
+            for elemento in elementos_lodo:
+                input_key = f'lodo_{elemento}'
+                if input_key in inputs and inputs[input_key] > 0:
+                    if elemento in IMPACT_FACTORS:
+                        for impact, factor in IMPACT_FACTORS[elemento].items():
+                            results[impact] += inputs[input_key] * factor
 
     return results
 
