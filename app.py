@@ -394,36 +394,29 @@ def calculate_impacts(inputs):
                         results[impact] += inputs['ton_km_factor_lodo'] * factor
         
         # Caso 3: Ferti-irrigação (versão atualizada)
-        elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
-            # Inicializa dicionário para somar impactos por categoria
-            total_impact = {impact: 0 for impact in IMPACT_NAMES}
-            
-            # Lista de elementos que podem estar presentes no lodo
-            elementos_lodo = [
-                'fosforo', 'nitrogenio', 'arsenio', 'bario', 'cadmio',
-                'chumbo', 'cobre', 'cromo', 'niquel', 'estanho',
-                'zinco', 'diclorobenzeno'
-            ]
-            
-            # Processa cada elemento do lodo
-            for elemento in elementos_lodo:
-                input_key = f'lodo_{elemento}'
-                if input_key in inputs and inputs[input_key] > 0:
-                    if elemento in IMPACT_FACTORS:
-                        for impact, factor in IMPACT_FACTORS[elemento].items():
-                            # Calcula o impacto para este elemento específico
-                            impact_value = inputs[input_key] * factor
-                            # Soma ao total desta categoria de impacto
-                            total_impact[impact] += impact_value
-                            # Adiciona ao resultado geral
-                            results[impact] += impact_value
-            
-            # Adiciona os impactos da ferti-irrigação separadamente por categoria
-            for impact_category, value in total_impact.items():
-                if value > 0:
-                    # Cria uma entrada específica para cada categoria de impacto
-                    impacts_key = f'ferti_irrigacao_{impact_category}'
-                    inputs[impacts_key] = value
+     elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
+        total_impact = {impact: 0 for impact in IMPACT_NAMES}
+        
+        elementos_lodo = [
+            'fosforo', 'nitrogenio', 'arsenio', 'bario', 'cadmio',
+            'chumbo', 'cobre', 'cromo', 'niquel', 'estanho',
+            'zinco', 'diclorobenzeno'
+        ]
+        
+        # Primeiro, calculamos os impactos totais
+        for elemento in elementos_lodo:
+            input_key = f'lodo_{elemento}'
+            if input_key in inputs and inputs[input_key] > 0:
+                if elemento in IMPACT_FACTORS:
+                    for impact, factor in IMPACT_FACTORS[elemento].items():
+                        impact_value = inputs[input_key] * factor
+                        total_impact[impact] += impact_value
+        
+        # Agora, adicionamos os impactos tanto aos resultados quanto como entradas separadas
+        for impact, value in total_impact.items():
+            if value > 0:
+                results[impact] += value  # Adiciona ao total geral
+                inputs[f'ferti_irrigacao'] = value  # Cria uma entrada específica para ferti-irrigação
     
     return results
 
