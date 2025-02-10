@@ -333,10 +333,26 @@ def number_input_scientific(label, value=0.0, step=0.1):
 
 def calculate_impacts(inputs):
     results = {impact: 0 for impact in IMPACT_NAMES}
+    
+    # Processamento geral
     for input_name, value in inputs.items():
         if input_name in IMPACT_FACTORS:
             for impact, factor in IMPACT_FACTORS[input_name].items():
                 results[impact] += value * factor
+    
+    # Processamento específico para disposição do lodo
+    if 'disposicao_lodo' in inputs and 'quantidade_lodo' in inputs:
+        # Determinar qual fator usar baseado no tipo de disposição
+        if inputs['disposicao_lodo'] == 'Disposição em aterro':
+            impact_key = 'lodo_aterro'
+        elif inputs['disposicao_lodo'] == 'Disposição em lixão':
+            impact_key = 'lodo_lixao'
+        
+        # Aplicar os fatores de impacto
+        if impact_key:
+            for impact, factor in IMPACT_FACTORS[impact_key].items():
+                results[impact] += inputs['quantidade_lodo'] * factor
+    
     return results
 
 st.title('Avaliação do Ciclo de Vida para ETE')
@@ -457,10 +473,15 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
 
 if st.button('Calcular Impactos'):
+    # Adicionar informações do lodo
     if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
-        inputs['ton_km_factor_lodo'] = ton_km_factor_lodo
-        inputs['disposicao_lodo'] = disposicao_lodo
-        inputs['quantidade_lodo'] = quantidade_lodo 
+        inputs['disposicao_lodo'] = disposicao_lodo  # Tipo de disposição
+        inputs['quantidade_lodo'] = quantidade_lodo   # Quantidade de lodo
+        
+        # Incluir o transporte do lodo
+        if ton_km_factor_lodo > 0:
+            for impact, factor in IMPACT_FACTORS['transportes'].items():
+                results[impact] += ton_km_factor_lodo * factor
     
     # Adicione as informações do queimador aos inputs
     inputs['tipo_queimador'] = tipo_queimador
