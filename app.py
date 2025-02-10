@@ -457,10 +457,10 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
 
 if st.button('Calcular Impactos'):
-    # Adicione as informações do lodo aos inputs
     if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
         inputs['ton_km_factor_lodo'] = ton_km_factor_lodo
         inputs['disposicao_lodo'] = disposicao_lodo
+        inputs['quantidade_lodo'] = quantidade_lodo  # Adicionar esta linha
     
     # Adicione as informações do queimador aos inputs
     inputs['tipo_queimador'] = tipo_queimador
