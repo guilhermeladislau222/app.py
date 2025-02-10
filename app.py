@@ -506,22 +506,22 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
     
     st.write("Elementos adicionais (opcionais)")
     if st.checkbox('Mostrar elementos do lodo'):
-    # Lista de elementos usando nomes padronizados (sem acentos, minúsculos)
-    elementos_adicionais = [
-        'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
-        'molibdenio', 'niquel', 'estanho', 'zinco', 'diclorobenzeno'
-    ]
-    
-    # Para cada elemento, criamos um campo de entrada
-    for elemento in elementos_adicionais:
-        # Criamos a chave do input com prefixo 'lodo_'
-        input_key = f'lodo_{elemento}'
-        # Criamos o campo de entrada, capitalizando o nome do elemento para exibição
-        inputs[input_key] = number_input_scientific(
-            f'Lodo - {elemento.capitalize()} (kg/m³)', 
-            value=0.0, 
-            step=0.0001
-        )
+        # Lista de elementos usando nomes padronizados (sem acentos, minúsculos)
+        elementos_adicionais = [
+            'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
+            'molibdenio', 'niquel', 'estanho', 'zinco', 'diclorobenzeno'
+        ]
+        
+        # Para cada elemento, criamos um campo de entrada
+        for elemento in elementos_adicionais:
+            # Criamos a chave do input com prefixo 'lodo_'
+            input_key = f'lodo_{elemento}'
+            # Criamos o campo de entrada, capitalizando o nome do elemento para exibição
+            inputs[input_key] = number_input_scientific(
+                f'Lodo - {elemento.capitalize()} (kg/m³)', 
+                value=0.0, 
+                step=0.0001
+            )
     
 # Passo 4: Queima de Biogás# não esqueça as observações no video do fernando
 st.header('Passo 4: Queima de Biogás')
