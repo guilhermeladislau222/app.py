@@ -344,7 +344,7 @@ def number_input_scientific(label, value=0.0, step=0.1):
     return parse_scientific_notation(value_input)
 
 def calculate_impacts(inputs):
-    # Inicializa o dicionário de resultados com zero para cada categoria de impacto
+    # Inicializa o dicionário de resultados com zero para cada categoria
     results = {impact: 0 for impact in IMPACT_NAMES}
     
     # Processamento geral para todos os inputs que têm fatores diretos
@@ -355,7 +355,7 @@ def calculate_impacts(inputs):
     
     # Processamento específico para resíduos do tratamento preliminar
     if 'quantity' in inputs and 'destination' in inputs:
-        # Seleciona os fatores corretos baseado no destino (aterro ou lixão)
+        # Seleciona os fatores corretos baseado no destino
         impact_key = 'residuos_trat_preliminar_aterro' if inputs['destination'] == 'Aterro Sanitário' else 'residuos_trat_preliminar_lixao'
         
         # Aplica os fatores de impacto dos resíduos
@@ -371,11 +371,10 @@ def calculate_impacts(inputs):
     if 'disposicao_lodo' in inputs:
         # Caso 1: Disposição em Aterro
         if inputs['disposicao_lodo'] == 'Disposição em aterro':
-            impact_key = 'lodo_aterro'
             if 'quantidade_lodo' in inputs:
-                for impact, factor in IMPACT_FACTORS[impact_key].items():
+                for impact, factor in IMPACT_FACTORS['lodo_aterro'].items():
                     results[impact] += inputs['quantidade_lodo'] * factor
-                    
+                
                 # Adiciona impacto do transporte do lodo
                 if 'ton_km_factor_lodo' in inputs and inputs['ton_km_factor_lodo'] > 0:
                     for impact, factor in IMPACT_FACTORS['transportes'].items():
@@ -383,26 +382,24 @@ def calculate_impacts(inputs):
         
         # Caso 2: Disposição em Lixão
         elif inputs['disposicao_lodo'] == 'Disposição em lixão':
-            impact_key = 'lodo_lixao'
             if 'quantidade_lodo' in inputs:
-                for impact, factor in IMPACT_FACTORS[impact_key].items():
+                for impact, factor in IMPACT_FACTORS['lodo_lixao'].items():
                     results[impact] += inputs['quantidade_lodo'] * factor
-                    
+                
                 # Adiciona impacto do transporte do lodo
                 if 'ton_km_factor_lodo' in inputs and inputs['ton_km_factor_lodo'] > 0:
                     for impact, factor in IMPACT_FACTORS['transportes'].items():
                         results[impact] += inputs['ton_km_factor_lodo'] * factor
         
-        # Caso 3: Ferti-irrigação (versão corrigida)
+        # Caso 3: Ferti-irrigação
         elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
-            # Lista de elementos que podem estar presentes no lodo
+            # Lista de elementos usando os mesmos nomes padronizados da interface
             elementos_lodo = [
-                'fosforo', 'nitrogenio', 'arsenio', 'bario', 'cadmio',
-                'chumbo', 'cobre', 'cromo', 'niquel', 'estanho',
-                'zinco', 'diclorobenzeno'
+                'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
+                'molibdenio', 'niquel', 'estanho', 'zinco', 'diclorobenzeno'
             ]
             
-            # Dicionário para acumular impactos por categoria
+            # Dicionário para acumular impactos de cada categoria
             impactos_ferti = {impact: 0 for impact in IMPACT_NAMES}
             
             # Processa cada elemento do lodo
@@ -411,20 +408,16 @@ def calculate_impacts(inputs):
                 if input_key in inputs and inputs[input_key] > 0:
                     if elemento in IMPACT_FACTORS:
                         for impact, factor in IMPACT_FACTORS[elemento].items():
-                            # Calcula impacto deste elemento
+                            # Calcula e acumula os impactos
                             impact_value = inputs[input_key] * factor
-                            # Acumula no total da categoria
                             impactos_ferti[impact] += impact_value
-                            # Adiciona ao resultado geral
                             results[impact] += impact_value
             
-            # Adiciona os impactos acumulados ao dicionário de inputs
+            # Registra os impactos acumulados para visualização
             for impact, value in impactos_ferti.items():
                 if value > 0:
                     input_key = f'ferti_irrigacao_{impact}'
                     inputs[input_key] = value
-                    # Garante que o impacto seja contabilizado nos resultados gerais
-                    results[impact] = results.get(impact, 0) + value
     
     return results
     
@@ -512,17 +505,24 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
         inputs['lodo_nitrogenio'] = number_input_scientific('Nitrogênio Amoniacal (kg/m³)', value=0.0, step=0.001)
     
     st.write("Elementos adicionais (opcionais)")
-    if st.checkbox('Mostrar elementos do lodo'): # Nome alterado do checkbox
-        elementos_adicionais = [
-            'Arsênio', 'bario', 'Cádmio', 'Chumbo', 'Cobre', 'Cromo',
-            'Molibdênio', 'Níquel', 'Estanho', 'Zinco', '1,4-Diclorobenzeno'
-        ]
-        for elemento in elementos_adicionais:
-            inputs[f'lodo_{elemento.lower()}'] = number_input_scientific(
-                f'Lodo - {elemento} (kg/m³)', 
-                value=0.0, 
-                step=0.0001
-            )
+    if st.checkbox('Mostrar elementos do lodo'):
+    # Lista de elementos usando nomes padronizados (sem acentos, minúsculos)
+    elementos_adicionais = [
+        'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
+        'molibdenio', 'niquel', 'estanho', 'zinco', 'diclorobenzeno'
+    ]
+    
+    # Para cada elemento, criamos um campo de entrada
+    for elemento in elementos_adicionais:
+        # Criamos a chave do input com prefixo 'lodo_'
+        input_key = f'lodo_{elemento}'
+        # Criamos o campo de entrada, capitalizando o nome do elemento para exibição
+        inputs[input_key] = number_input_scientific(
+            f'Lodo - {elemento.capitalize()} (kg/m³)', 
+            value=0.0, 
+            step=0.0001
+        )
+    
 # Passo 4: Queima de Biogás# não esqueça as observações no video do fernando
 st.header('Passo 4: Queima de Biogás')
 
