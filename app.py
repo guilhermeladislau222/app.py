@@ -269,8 +269,9 @@ def group_parameters_by_category(inputs):
         ],
         'Resíduos': [
             'residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao',
-            'lodo_aterro', 'lodo_lixao', 'ferti_irrigacao'
-        ],
+            'lodo_aterro', 'lodo_lixao'
+        ] + [f'ferti_irrigacao_{impact}' for impact in IMPACT_NAMES]
+        
         'Transportes': [
             'transportes'
         ],
@@ -381,9 +382,9 @@ def calculate_impacts(inputs):
                     for impact, factor in IMPACT_FACTORS['transportes'].items():
                         results[impact] += inputs['ton_km_factor_lodo'] * factor
         
-        # Caso 3: Ferti-irrigação
+        # Caso 3: Ferti-irrigação (versão atualizada)
         elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
-            # Inicializa dicionário para somar todos os impactos da ferti-irrigação
+            # Inicializa dicionário para somar impactos por categoria
             total_impact = {impact: 0 for impact in IMPACT_NAMES}
             
             # Lista de elementos que podem estar presentes no lodo
@@ -399,12 +400,19 @@ def calculate_impacts(inputs):
                 if input_key in inputs and inputs[input_key] > 0:
                     if elemento in IMPACT_FACTORS:
                         for impact, factor in IMPACT_FACTORS[elemento].items():
+                            # Calcula o impacto para este elemento específico
                             impact_value = inputs[input_key] * factor
+                            # Soma ao total desta categoria de impacto
                             total_impact[impact] += impact_value
+                            # Adiciona ao resultado geral
                             results[impact] += impact_value
             
-            # Adiciona o total como ferti_irrigacao para aparecer no gráfico de resíduos
-            inputs['ferti_irrigacao'] = sum(total_impact.values())
+            # Adiciona os impactos da ferti-irrigação separadamente por categoria
+            for impact_category, value in total_impact.items():
+                if value > 0:
+                    # Cria uma entrada específica para cada categoria de impacto
+                    impacts_key = f'ferti_irrigacao_{impact_category}'
+                    inputs[impacts_key] = value
     
     return results
 
