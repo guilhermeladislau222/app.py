@@ -269,7 +269,7 @@ def group_parameters_by_category(inputs):
         ],
         'Resíduos': [
             'residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao',
-            'lodo_aterro', 'lodo_lixao'
+            'lodo_aterro', 'lodo_lixao', 'ferti_irrigacao'
         ],
         'Transportes': [
             'transportes'
@@ -334,56 +334,78 @@ def number_input_scientific(label, value=0.0, step=0.1):
 def calculate_impacts(inputs):
     # Inicializa o dicionário de resultados com zero para cada categoria de impacto
     results = {impact: 0 for impact in IMPACT_NAMES}
-
+    
     # Processamento geral para todos os inputs que têm fatores diretos
     for input_name, value in inputs.items():
         if input_name in IMPACT_FACTORS:
             for impact, factor in IMPACT_FACTORS[input_name].items():
                 results[impact] += value * factor
-
+    
     # Processamento específico para resíduos do tratamento preliminar
     if 'quantity' in inputs and 'destination' in inputs:
         # Seleciona os fatores corretos baseado no destino (aterro ou lixão)
         impact_key = 'residuos_trat_preliminar_aterro' if inputs['destination'] == 'Aterro Sanitário' else 'residuos_trat_preliminar_lixao'
-
+        
         # Aplica os fatores de impacto dos resíduos
         for impact, factor in IMPACT_FACTORS[impact_key].items():
             results[impact] += inputs['quantity'] * factor
-
+            
         # Adiciona impacto do transporte dos resíduos
         if 'ton_km_factor' in inputs and inputs['ton_km_factor'] > 0:
             for impact, factor in IMPACT_FACTORS['transportes'].items():
                 results[impact] += inputs['ton_km_factor'] * factor
-
+    
     # Processamento específico para disposição do lodo
     if 'disposicao_lodo' in inputs:
+        # Caso 1: Disposição em Aterro
         if inputs['disposicao_lodo'] == 'Disposição em aterro':
             impact_key = 'lodo_aterro'
             if 'quantidade_lodo' in inputs:
                 for impact, factor in IMPACT_FACTORS[impact_key].items():
                     results[impact] += inputs['quantidade_lodo'] * factor
+                    
+                # Adiciona impacto do transporte do lodo
+                if 'ton_km_factor_lodo' in inputs and inputs['ton_km_factor_lodo'] > 0:
+                    for impact, factor in IMPACT_FACTORS['transportes'].items():
+                        results[impact] += inputs['ton_km_factor_lodo'] * factor
         
+        # Caso 2: Disposição em Lixão
         elif inputs['disposicao_lodo'] == 'Disposição em lixão':
             impact_key = 'lodo_lixao'
             if 'quantidade_lodo' in inputs:
                 for impact, factor in IMPACT_FACTORS[impact_key].items():
                     results[impact] += inputs['quantidade_lodo'] * factor
+                    
+                # Adiciona impacto do transporte do lodo
+                if 'ton_km_factor_lodo' in inputs and inputs['ton_km_factor_lodo'] > 0:
+                    for impact, factor in IMPACT_FACTORS['transportes'].items():
+                        results[impact] += inputs['ton_km_factor_lodo'] * factor
         
+        # Caso 3: Ferti-irrigação
         elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
-            # Processa cada elemento do lodo na ferti-irrigação
+            # Inicializa dicionário para somar todos os impactos da ferti-irrigação
+            total_impact = {impact: 0 for impact in IMPACT_NAMES}
+            
+            # Lista de elementos que podem estar presentes no lodo
             elementos_lodo = [
                 'fosforo', 'nitrogenio', 'arsenio', 'bario', 'cadmio',
                 'chumbo', 'cobre', 'cromo', 'niquel', 'estanho',
                 'zinco', 'diclorobenzeno'
             ]
             
+            # Processa cada elemento do lodo
             for elemento in elementos_lodo:
                 input_key = f'lodo_{elemento}'
                 if input_key in inputs and inputs[input_key] > 0:
                     if elemento in IMPACT_FACTORS:
                         for impact, factor in IMPACT_FACTORS[elemento].items():
-                            results[impact] += inputs[input_key] * factor
-
+                            impact_value = inputs[input_key] * factor
+                            total_impact[impact] += impact_value
+                            results[impact] += impact_value
+            
+            # Adiciona o total como ferti_irrigacao para aparecer no gráfico de resíduos
+            inputs['ferti_irrigacao'] = sum(total_impact.values())
+    
     return results
 
 st.title('Avaliação do Ciclo de Vida para ETE')
