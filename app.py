@@ -393,7 +393,7 @@ def calculate_impacts(inputs):
                     for impact, factor in IMPACT_FACTORS['transportes'].items():
                         results[impact] += inputs['ton_km_factor_lodo'] * factor
         
-        # Caso 3: Ferti-irrigação (versão modificada)
+        # Caso 3: Ferti-irrigação
         elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
             # Lista de elementos que podem estar presentes no lodo
             elementos_lodo = [
@@ -408,12 +408,10 @@ def calculate_impacts(inputs):
                     if elemento in IMPACT_FACTORS:
                         # Para cada elemento, aplica seus fatores de impacto
                         for impact, factor in IMPACT_FACTORS[elemento].items():
-                            # Calcula o impacto deste elemento
                             impact_value = inputs[input_key] * factor
-                            # Adiciona diretamente ao resultado geral
                             results[impact] += impact_value
             
-            # Também processa fósforo e nitrogênio se presentes
+            # Processa fósforo e nitrogênio se presentes
             if 'lodo_fosforo' in inputs and inputs['lodo_fosforo'] > 0:
                 if 'fosforo' in IMPACT_FACTORS:
                     for impact, factor in IMPACT_FACTORS['fosforo'].items():
@@ -423,13 +421,15 @@ def calculate_impacts(inputs):
                 if 'nitrogenio_amoniacal' in IMPACT_FACTORS:
                     for impact, factor in IMPACT_FACTORS['nitrogenio_amoniacal'].items():
                         results[impact] += inputs['lodo_nitrogenio'] * factor
-    # Trata o reaproveitamento de biogás se estiver presente nos inputs
-    if 'quantidade_biogas' in inputs and 'eficiencia_conversao' in inputs:
-        if inputs['quantidade_biogas'] > 0 and inputs['eficiencia_conversao'] > 0:
-            energia_gerada = inputs['quantidade_biogas'] * (inputs['eficiencia_conversao'] / 100)
-            # Aplica fatores negativos para emissões evitadas
-            for impact, factor in IMPACT_FACTORS['eletricidade'].items():
-                results[impact] += -1 * energia_gerada * factor
+
+    # Nova seção: Processamento do reaproveitamento de biogás
+    if ('quantidade_biogas' in inputs and inputs['quantidade_biogas'] > 0):
+        # Como a eficiência está fixa em 100%, a energia gerada é igual à quantidade de biogás
+        energia_gerada = inputs['quantidade_biogas']
+        # Aplica fatores negativos para emissões evitadas
+        for impact, factor in IMPACT_FACTORS['eletricidade'].items():
+            results[impact] += -1 * energia_gerada * factor
+    
     return results
     
 st.title('Avaliação do Ciclo de Vida para ETE')
@@ -464,8 +464,7 @@ additional_processes = st.multiselect(
     'Selecione o(s) Processo(s) Adicional(is)',
     ['Wetland de Fluxo Vertical', 
      'Filtro Biológico percolador + Decantador Segundario', 
-     'Lagoa de Polimento',
-     'Reaproveitamento Biogás']
+     'Lagoa de Polimento']
 )
 
 # Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
@@ -537,7 +536,7 @@ elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
                 step=0.0001
             )
     
-# Passo 4: Queima de Biogás# não esqueça as observações no video do fernando
+# Passo 4: Queima de Biogás
 st.header('Passo 4: Queima de Biogás')
 
 tipo_queimador = st.selectbox(
@@ -548,6 +547,21 @@ tipo_queimador = st.selectbox(
 if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
     st.subheader('Emissões do Queimador Fechado')
     inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
+    
+    # Passo 5 aparece automaticamente quando o queimador fechado é selecionado
+    st.header('Passo 5: Reaproveitamento Biogás')
+    st.write('Como você selecionou o queimador fechado com reaproveitamento energético, preencha os dados do reaproveitamento de biogás para calcular as emissões evitadas.')
+    st.info('A eficiência de conversão energética está definida em 100%.')
+    
+    # Agora apenas um input para a quantidade de biogás
+    inputs['quantidade_biogas'] = number_input_scientific(
+        'Quantidade de biogás aproveitado (m³/dia)', 
+        value=0.0, 
+        step=0.1
+    )
+    
+    # Definimos a eficiência como 100% automaticamente
+    inputs['eficiencia_conversao'] = 100.0
 
 elif tipo_queimador == 'Queimador aberto':
     st.subheader('Emissões do Queimador Aberto')
@@ -558,24 +572,7 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
     with col2:
         inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
-# INSIRA AQUI o novo Passo 5
-if 'Reaproveitamento Biogás' in additional_processes:
-    st.header('Passo 5: Reaproveitamento Biogás')
-    st.write('Insira os dados do reaproveitamento de biogás para calcular as emissões evitadas.')
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        inputs['quantidade_biogas'] = number_input_scientific(
-            'Quantidade de biogás aproveitado (m³/dia)', 
-            value=0.0, 
-            step=0.1
-        )
-    with col2:
-        inputs['eficiencia_conversao'] = number_input_scientific(
-            'Eficiência de conversão energética (%)', 
-            value=0.0, 
-            step=0.1
-        )
+        
 if st.button('Calcular Impactos'):
     # Primeiro, adicionamos todas as informações do tratamento preliminar ao dicionário inputs
     inputs['quantity'] = quantity
