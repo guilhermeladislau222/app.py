@@ -555,7 +555,7 @@ if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
     
     # Agora apenas um input para a quantidade de biogás
     inputs['quantidade_biogas'] = number_input_scientific(
-        'Quantidade de biogás aproveitado (m³/dia)', 
+        'Eletricidade (kWh.m−3)', 
         value=0.0, 
         step=0.1
     )
