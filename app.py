@@ -278,7 +278,7 @@ def group_parameters_by_category(inputs):
         'Resíduos': [
             'residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao',
             'lodo_aterro', 'lodo_lixao'
-        ] + [f'ferti_irrigacao_{impact}' for impact in IMPACT_NAMES],  # Adiciona entradas para cada categoria de impacto da ferti-irrigação
+        ] + [f'ferti_irrigacao_{impact}' for impact in IMPACT_NAMES],  
         
         # Transportes inclui todos os impactos relacionados ao transporte
         'Transportes': [
