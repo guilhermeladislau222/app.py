@@ -253,28 +253,39 @@ IMPACT_NAMES = {
 }
 # Adicione as novas funções aqui
 def group_parameters_by_category(inputs):
+    # Define as categorias e seus respectivos parâmetros
     categories = {
+        # Emissões para água inclui todos os parâmetros de qualidade da água
         'Emissões para a água': [
             'fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio',
             'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel'
         ],
+        
+        # Emissões para o solo inclui todos os parâmetros relacionados ao lodo
         'Emissões para o solo (Lodo)': [
             'lodo_fosforo', 'lodo_nitrogenio', 'lodo_arsenio', 'lodo_bario',
             'lodo_cadmio', 'lodo_chumbo', 'lodo_cobre', 'lodo_cromo',
             'lodo_molibdenio', 'lodo_niquel', 'lodo_estanho', 'lodo_zinco',
             'lodo_diclorobenzeno'
         ],
+        
+        # Emissões para o ar inclui gases e compostos voláteis
         'Emissões para o ar': [
             'metano', 'oxido_nitroso', 'nitrogenio_amoniacal', 'dioxido_carbono'
         ],
+        
+        # Resíduos inclui todos os tipos de disposição, incluindo ferti-irrigação
         'Resíduos': [
             'residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao',
             'lodo_aterro', 'lodo_lixao'
-        ] + [f'ferti_irrigacao_{impact}' for impact in IMPACT_NAMES]
+        ] + [f'ferti_irrigacao_{impact}' for impact in IMPACT_NAMES],  # Adiciona entradas para cada categoria de impacto da ferti-irrigação
         
+        # Transportes inclui todos os impactos relacionados ao transporte
         'Transportes': [
             'transportes'
         ],
+        
+        # Emissões evitadas inclui fatores que reduzem impactos
         'Emissões evitadas': [
             'eletricidade'
         ]
