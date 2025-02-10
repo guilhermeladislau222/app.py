@@ -423,7 +423,13 @@ def calculate_impacts(inputs):
                 if 'nitrogenio_amoniacal' in IMPACT_FACTORS:
                     for impact, factor in IMPACT_FACTORS['nitrogenio_amoniacal'].items():
                         results[impact] += inputs['lodo_nitrogenio'] * factor
-    
+    # Trata o reaproveitamento de biogás se estiver presente nos inputs
+    if 'quantidade_biogas' in inputs and 'eficiencia_conversao' in inputs:
+        if inputs['quantidade_biogas'] > 0 and inputs['eficiencia_conversao'] > 0:
+            energia_gerada = inputs['quantidade_biogas'] * (inputs['eficiencia_conversao'] / 100)
+            # Aplica fatores negativos para emissões evitadas
+            for impact, factor in IMPACT_FACTORS['eletricidade'].items():
+                results[impact] += -1 * energia_gerada * factor
     return results
     
 st.title('Avaliação do Ciclo de Vida para ETE')
@@ -456,7 +462,10 @@ st.write('O tratamento UASB está pré-selecionado.')
 st.subheader('Processos Adicionais')
 additional_processes = st.multiselect(
     'Selecione o(s) Processo(s) Adicional(is)',
-    ['Wetland de Fluxo Vertical', 'Filtro Biológico percolador + Decantador Segundario', 'Lagoa de Polimento']
+    ['Wetland de Fluxo Vertical', 
+     'Filtro Biológico percolador + Decantador Segundario', 
+     'Lagoa de Polimento',
+     'Reaproveitamento Biogás']
 )
 
 # Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
@@ -549,7 +558,24 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
     with col2:
         inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
-
+# INSIRA AQUI o novo Passo 5
+if 'Reaproveitamento Biogás' in additional_processes:
+    st.header('Passo 5: Reaproveitamento Biogás')
+    st.write('Insira os dados do reaproveitamento de biogás para calcular as emissões evitadas.')
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        inputs['quantidade_biogas'] = number_input_scientific(
+            'Quantidade de biogás aproveitado (m³/dia)', 
+            value=0.0, 
+            step=0.1
+        )
+    with col2:
+        inputs['eficiencia_conversao'] = number_input_scientific(
+            'Eficiência de conversão energética (%)', 
+            value=0.0, 
+            step=0.1
+        )
 if st.button('Calcular Impactos'):
     # Primeiro, adicionamos todas as informações do tratamento preliminar ao dicionário inputs
     inputs['quantity'] = quantity
