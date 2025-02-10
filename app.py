@@ -392,26 +392,22 @@ def calculate_impacts(inputs):
                         results[impact] += inputs['ton_km_factor_lodo'] * factor
         
         # Caso 3: Ferti-irrigação
-        elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
-            # Lista de elementos usando os mesmos nomes padronizados da interface
-            elementos_lodo = [
-                'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
-                'molibdenio', 'niquel', 'estanho', 'zinco', 'diclorobenzeno'
-            ]
-            
-            # Dicionário para acumular impactos de cada categoria
-            impactos_ferti = {impact: 0 for impact in IMPACT_NAMES}
-            
-            # Processa cada elemento do lodo
-            for elemento in elementos_lodo:
-                input_key = f'lodo_{elemento}'
-                if input_key in inputs and inputs[input_key] > 0:
-                    if elemento in IMPACT_FACTORS:
-                        for impact, factor in IMPACT_FACTORS[elemento].items():
-                            # Calcula e acumula os impactos
-                            impact_value = inputs[input_key] * factor
-                            impactos_ferti[impact] += impact_value
-                            results[impact] += impact_value
+      elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
+    elementos_lodo = [
+        'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
+        'molibdenio', 'niquel', 'estanho', 'zinco', 'diclorobenzeno'
+    ]
+    
+    # Iniciamos um dicionário para acumular os impactos por categoria
+    for elemento in elementos_lodo:
+        input_key = f'lodo_{elemento}'
+        if input_key in inputs and inputs[input_key] > 0:
+            if elemento in IMPACT_FACTORS:
+                for impact, factor in IMPACT_FACTORS[elemento].items():
+                    # Calculamos o impacto
+                    impact_value = inputs[input_key] * factor
+                    # Adicionamos diretamente ao results
+                    results[impact] += impact_value
             
             # Registra os impactos acumulados para visualização
             for impact, value in impactos_ferti.items():
