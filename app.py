@@ -498,7 +498,12 @@ if st.button('Calcular Impactos'):
     inputs['destination'] = destination
     inputs['ton_km_factor'] = ton_km_factor
     
-
+    # Adicionar informações do lodo
+    if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
+        inputs['disposicao_lodo'] = disposicao_lodo
+        inputs['quantidade_lodo'] = quantidade_lodo  # Adiciona a quantidade de lodo
+        inputs['ton_km_factor_lodo'] = ton_km_factor_lodo  # Adiciona o fator de transporte do lodo
+    
     # Adicione as informações do queimador aos inputs
     inputs['tipo_queimador'] = tipo_queimador
     
