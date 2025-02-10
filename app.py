@@ -332,28 +332,43 @@ def number_input_scientific(label, value=0.0, step=0.1):
     return parse_scientific_notation(value_input)
 
 def calculate_impacts(inputs):
+    # Inicializa o dicionário de resultados com zero para cada categoria de impacto
     results = {impact: 0 for impact in IMPACT_NAMES}
     
-    # Processamento geral
+    # Processamento geral para todos os inputs que têm fatores diretos
     for input_name, value in inputs.items():
         if input_name in IMPACT_FACTORS:
             for impact, factor in IMPACT_FACTORS[input_name].items():
                 results[impact] += value * factor
     
+    # Processamento específico para resíduos do tratamento preliminar
+    if 'quantity' in inputs and 'destination' in inputs:
+        # Seleciona os fatores corretos baseado no destino (aterro ou lixão)
+        impact_key = 'residuos_trat_preliminar_aterro' if inputs['destination'] == 'Aterro Sanitário' else 'residuos_trat_preliminar_lixao'
+        
+        # Aplica os fatores de impacto dos resíduos
+        for impact, factor in IMPACT_FACTORS[impact_key].items():
+            results[impact] += inputs['quantity'] * factor
+            
+        # Adiciona impacto do transporte dos resíduos
+        if 'ton_km_factor' in inputs and inputs['ton_km_factor'] > 0:
+            for impact, factor in IMPACT_FACTORS['transportes'].items():
+                results[impact] += inputs['ton_km_factor'] * factor
+    
     # Processamento específico para disposição do lodo
     if 'disposicao_lodo' in inputs and 'quantidade_lodo' in inputs:
-        # Determinar qual fator usar baseado no tipo de disposição
+        # Determina qual fator usar baseado no tipo de disposição
         if inputs['disposicao_lodo'] == 'Disposição em aterro':
             impact_key = 'lodo_aterro'
         elif inputs['disposicao_lodo'] == 'Disposição em lixão':
             impact_key = 'lodo_lixao'
         
-        # Aplicar os fatores de impacto
+        # Aplica os fatores de impacto do lodo
         if impact_key:
             for impact, factor in IMPACT_FACTORS[impact_key].items():
                 results[impact] += inputs['quantidade_lodo'] * factor
     
-        # Adicionar impacto do transporte do lodo
+        # Adiciona impacto do transporte do lodo
         if 'ton_km_factor_lodo' in inputs and inputs['ton_km_factor_lodo'] > 0:
             for impact, factor in IMPACT_FACTORS['transportes'].items():
                 results[impact] += inputs['ton_km_factor_lodo'] * factor
@@ -478,12 +493,12 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
 
 if st.button('Calcular Impactos'):
-    # Adicionar informações do lodo
-    if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
-        inputs['disposicao_lodo'] = disposicao_lodo
-        inputs['quantidade_lodo'] = quantidade_lodo
-        inputs['ton_km_factor_lodo'] = ton_km_factor_lodo  # Adiciona o fator de transporte
+    # Adicionar informações do tratamento preliminar
+    inputs['quantity'] = quantity
+    inputs['destination'] = destination
+    inputs['ton_km_factor'] = ton_km_factor
     
+
     # Adicione as informações do queimador aos inputs
     inputs['tipo_queimador'] = tipo_queimador
     
