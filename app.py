@@ -683,8 +683,12 @@ if st.button('Calcular Impactos'):
     )
     
     # Mostramos o gráfico principal
-    st.plotly_chart(fig)
-# Adiciona um espaçamento entre os gráficos
+   st.plotly_chart(fig)
+    
+    # IMPORTANTE: Esta parte precisa estar com a mesma indentação que o código acima,
+    # ou seja, dentro do if st.button('Calcular Impactos'):
+    
+    # Adiciona um espaçamento entre os gráficos
     st.markdown("---")
     st.subheader("Análise Detalhada por Categoria")
     
