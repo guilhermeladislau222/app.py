@@ -702,15 +702,6 @@ if st.button('Calcular Impactos'):
     st.plotly_chart(fig)
     
     # Análise Detalhada por Categoria
-    st.markdown("---")
-    st.subheader("Análise Detalhada por Categoria")
-    st.info("Calculando impactos por categoria...")
-    
-    impact_selected = st.selectbox(
-        'Selecione o tipo de impacto para visualizar:',
-        ['Ecotoxidade de Água Doce', 'Eutrofização de Água Doce', 'Aquecimento Global', 
-         'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
-    )
     
     category_impacts = calculate_impacts_by_category(inputs, impact_selected)
     
