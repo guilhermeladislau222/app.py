@@ -252,6 +252,7 @@ IMPACT_NAMES = {
     'Ecotoxidade Terrestre': "Ecotoxidade Terrestre (kg 1,4-DCB)",
 }
 # Adicione as novas funções aqui
+
 def group_parameters_by_category(inputs):
     # Define as categorias e seus respectivos parâmetros
     categories = {
