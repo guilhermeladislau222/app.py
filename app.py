@@ -255,9 +255,7 @@ IMPACT_NAMES = {
 def calculate_impacts_by_category(inputs, impact_type):
     """
     Calcula os impactos por categoria para um tipo específico de impacto.
-    Versão melhorada com melhor tratamento dos inputs e cálculos mais precisos.
     """
-    # Inicializa as categorias com zero
     category_impacts = {
         'Consumo de Eletricidade': 0,
         'Consumo de produtos químicos': 0,
@@ -267,40 +265,34 @@ def calculate_impacts_by_category(inputs, impact_type):
         'Emissões do lodo': 0,
         'Emissões de resíduos': 0
     }
-
-    # Debug para ver os inputs recebidos
-    print("Inputs recebidos:", inputs)
     
     # Eletricidade (incluindo biogás)
     if 'eletricidade' in inputs and inputs['eletricidade'] != 0:
         valor_eletricidade = inputs['eletricidade'] * IMPACT_FACTORS['eletricidade'].get(impact_type, 0)
         # Se tiver biogás, considera como redução no consumo de eletricidade
-        if tipo_queimador == 'Queimador fechado com reaproveitamento energético' and inputs.get('quantidade_biogas', 0) > 0:
+        if inputs.get('tipo_queimador') == 'Queimador fechado com reaproveitamento energético' and inputs.get('quantidade_biogas', 0) > 0:
             valor_eletricidade -= inputs['quantidade_biogas'] * IMPACT_FACTORS['eletricidade'].get(impact_type, 0)
         category_impacts['Consumo de Eletricidade'] = valor_eletricidade
 
-    # Produtos químicos (verifica se existem inputs)
-    produtos_quimicos = {
-        'cloreto_ferrico': 0, 'sulfato_ferro': 0, 'policloreto_aluminio': 0,
-        'sulfato_aluminio': 0, 'hipoclorito_sodio': 0, 'acido_paracetico': 0,
-        'peroxido_hidrogenio': 0, 'cal': 0, 'hidroxido_sodio': 0, 
-        'nitrato_calcio': 0, 'sulfato_sodio': 0
-    }
-    
+    # Produtos químicos
+    produtos_quimicos = [
+        'cloreto_ferrico', 'sulfato_ferro', 'policloreto_aluminio',
+        'sulfato_aluminio', 'hipoclorito_sodio', 'acido_paracetico',
+        'peroxido_hidrogenio', 'cal', 'hidroxido_sodio', 'nitrato_calcio',
+        'sulfato_sodio'
+    ]
     for produto in produtos_quimicos:
         if produto in inputs and inputs[produto] != 0:
-            print(f"Calculando impacto de {produto}: {inputs[produto]} * {IMPACT_FACTORS[produto].get(impact_type, 0)}")
-            category_impacts['Consumo de produtos químicos'] += inputs[produto] * IMPACT_FACTORS[produto].get(impact_type, 0)
+            impact_factor = IMPACT_FACTORS[produto].get(impact_type, 0)
+            category_impacts['Consumo de produtos químicos'] += inputs[produto] * impact_factor
 
-    # Transportes (considera todos os tipos de transporte)
-    transport_impact = 0
+    # Transportes
     if 'ton_km_factor' in inputs and inputs['ton_km_factor'] != 0:
-        transport_impact += inputs['ton_km_factor'] * IMPACT_FACTORS['transportes'].get(impact_type, 0)
+        category_impacts['Transportes'] += inputs['ton_km_factor'] * IMPACT_FACTORS['transportes'].get(impact_type, 0)
     if 'ton_km_factor_lodo' in inputs and inputs['ton_km_factor_lodo'] != 0:
-        transport_impact += inputs['ton_km_factor_lodo'] * IMPACT_FACTORS['transportes'].get(impact_type, 0)
-    category_impacts['Transportes'] = transport_impact
+        category_impacts['Transportes'] += inputs['ton_km_factor_lodo'] * IMPACT_FACTORS['transportes'].get(impact_type, 0)
 
-    # Emissões para água (efluentes)
+    # Emissões do efluente
     efluentes = ['fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio',
                  'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel']
     for efluente in efluentes:
@@ -308,14 +300,10 @@ def calculate_impacts_by_category(inputs, impact_type):
             category_impacts['Emissões do efluente'] += inputs[efluente] * IMPACT_FACTORS[efluente].get(impact_type, 0)
 
     # Emissões de gases
-    if 'tipo_queimador' in inputs:
-        if inputs['tipo_queimador'] == 'Queimador aberto':
-            for gas in ['metano', 'oxido_nitroso', 'dioxido_carbono']:
-                if gas in inputs and inputs[gas] != 0:
-                    category_impacts['Emissões de gases'] += inputs[gas] * IMPACT_FACTORS[gas].get(impact_type, 0)
-        else:
-            if 'dioxido_carbono' in inputs:
-                category_impacts['Emissões de gases'] += inputs['dioxido_carbono'] * IMPACT_FACTORS['dioxido_carbono'].get(impact_type, 0)
+    gases = ['metano', 'oxido_nitroso', 'dioxido_carbono']
+    for gas in gases:
+        if gas in inputs and inputs[gas] != 0:
+            category_impacts['Emissões de gases'] += inputs[gas] * IMPACT_FACTORS[gas].get(impact_type, 0)
 
     # Emissões do lodo
     if 'disposicao_lodo' in inputs and 'quantidade_lodo' in inputs and inputs.get('quantidade_lodo', 0) != 0:
@@ -327,9 +315,6 @@ def calculate_impacts_by_category(inputs, impact_type):
         residuo_key = 'residuos_trat_preliminar_aterro' if inputs.get('destination') == 'Aterro Sanitário' else 'residuos_trat_preliminar_lixao'
         category_impacts['Emissões de resíduos'] = inputs['quantity'] * IMPACT_FACTORS[residuo_key].get(impact_type, 0)
 
-    # Debug para ver os resultados
-    print("Impactos calculados:", category_impacts)
-    
     return category_impacts
 def group_parameters_by_category(inputs):
     # Define as categorias e seus respectivos parâmetros
