@@ -603,7 +603,131 @@ if st.button('Calcular Impactos'):
         list(results.items()), 
         columns=['Categoria de Impacto', 'Valor']
     )
+
+    # Criamos um DataFrame para mostrar os resultados
+    df_results = pd.DataFrame(
+        list(results.items()), 
+        columns=['Categoria de Impacto', 'Valor']
+    )
     
+    # Mapeamos os nomes das categorias para seus nomes completos com unidades
+    df_results['Categoria de Impacto'] = df_results['Categoria de Impacto'].map(IMPACT_NAMES)
+    
+    # Garantimos que todos os valores são numéricos
+    df_results['Valor'] = pd.to_numeric(df_results['Valor'], errors='coerce')
+    
+    # Mostramos o cabeçalho dos resultados
+    st.header('Resultados')
+    
+    # Criamos o gráfico principal de impactos ambientais
+    fig_geral = px.bar(
+        df_results, 
+        x='Categoria de Impacto', 
+        y='Valor',
+        title='Impactos Ambientais por Categoria',
+        labels={'Valor': 'Impacto'},
+        color='Categoria de Impacto'
+    )
+    
+    # Personalizamos o layout do gráfico principal
+    fig_geral.update_layout(
+        xaxis_title="Categoria de Impacto",
+        yaxis_title="Valor do Impacto",
+        xaxis={'categoryorder':'total descending'},
+        showlegend=False,
+        height=600
+    )
+    
+    # Mostramos o gráfico principal
+    st.plotly_chart(fig_geral)
+    
+    # Seletor para o tipo de emissão
+    st.subheader('Análise Detalhada por Tipo de Impacto')
+    impacto_selecionado = st.selectbox(
+        'Selecione o tipo de impacto para análise detalhada:',
+        list(IMPACT_NAMES.keys())
+    )
+    
+    # Dados para o gráfico detalhado
+    categorias_fonte = [
+        'Consumo de Eletricidade',
+        'Consumo de produtos químicos',
+        'Transportes',
+        'Emissões do efluente',
+        'Emissões de gases',
+        'Emissões do lodo',
+        'Emissões de resíduos'
+    ]
+    
+    # Função para calcular o valor de cada categoria para o impacto selecionado
+    def calcular_valor_categoria(categoria, impacto):
+        valor = 0
+        if categoria == 'Consumo de Eletricidade':
+            if 'eletricidade' in inputs:
+                valor += inputs['eletricidade'] * IMPACT_FACTORS['eletricidade'].get(impacto, 0)
+        elif categoria == 'Consumo de produtos químicos':
+            produtos_quimicos = ['cloreto_ferrico', 'sulfato_ferro', 'policloreto_aluminio', 
+                               'sulfato_aluminio', 'hipoclorito_sodio', 'acido_paracetico',
+                               'peroxido_hidrogenio', 'cal', 'hidroxido_sodio', 'nitrato_calcio', 
+                               'sulfato_sodio']
+            for produto in produtos_quimicos:
+                if produto in inputs:
+                    valor += inputs[produto] * IMPACT_FACTORS[produto].get(impacto, 0)
+        elif categoria == 'Transportes':
+            if 'ton_km_factor' in inputs:
+                valor += inputs['ton_km_factor'] * IMPACT_FACTORS['transportes'].get(impacto, 0)
+        elif categoria == 'Emissões do efluente':
+            parametros_efluente = ['fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 
+                                 'selenio', 'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel']
+            for param in parametros_efluente:
+                if param in inputs:
+                    valor += inputs[param] * IMPACT_FACTORS[param].get(impacto, 0)
+        elif categoria == 'Emissões de gases':
+            gases = ['metano', 'oxido_nitroso', 'dioxido_carbono']
+            for gas in gases:
+                if gas in inputs:
+                    valor += inputs[gas] * IMPACT_FACTORS[gas].get(impacto, 0)
+        elif categoria == 'Emissões do lodo':
+            if 'disposicao_lodo' in inputs:
+                if inputs['disposicao_lodo'] in ['Disposição em aterro', 'Disposição em lixão']:
+                    lodo_key = 'lodo_aterro' if inputs['disposicao_lodo'] == 'Disposição em aterro' else 'lodo_lixao'
+                    if 'quantidade_lodo' in inputs:
+                        valor += inputs['quantidade_lodo'] * IMPACT_FACTORS[lodo_key].get(impacto, 0)
+        elif categoria == 'Emissões de resíduos':
+            if 'quantity' in inputs and 'destination' in inputs:
+                residuo_key = 'residuos_trat_preliminar_aterro' if inputs['destination'] == 'Aterro Sanitário' else 'residuos_trat_preliminar_lixao'
+                valor += inputs['quantity'] * IMPACT_FACTORS[residuo_key].get(impacto, 0)
+        return valor
+    
+    # Criamos os dados para o gráfico detalhado
+    valores_detalhados = [calcular_valor_categoria(cat, impacto_selecionado) for cat in categorias_fonte]
+    df_detalhado = pd.DataFrame({
+        'Categoria': categorias_fonte,
+        'Valor': valores_detalhados
+    })
+    
+    # Criamos o gráfico detalhado
+    fig_detalhado = px.bar(
+        df_detalhado,
+        x='Categoria',
+        y='Valor',
+        title=f'Detalhamento de {IMPACT_NAMES[impacto_selecionado]}',
+        labels={'Valor': 'Impacto', 'Categoria': 'Fonte de Impacto'},
+        color='Categoria'
+    )
+    
+    fig_detalhado.update_layout(
+        xaxis_title="Fonte de Impacto",
+        yaxis_title="Valor do Impacto",
+        xaxis={'categoryorder':'total descending'},
+        showlegend=False,
+        height=600
+    )
+    
+    st.plotly_chart(fig_detalhado)
+    
+    # Mostramos a tabela com todos os resultados
+    st.table(df_results)
     # Mapeamos os nomes das categorias para seus nomes completos com unidades
     df_results['Categoria de Impacto'] = df_results['Categoria de Impacto'].map(IMPACT_NAMES)
     
