@@ -253,10 +253,6 @@ IMPACT_NAMES = {
 }
 # Adicione as novas funções aqui
 def calculate_impacts_by_category(inputs, impact_type):
-    # Add debug prints
-    st.write("Inputs received:", inputs)
-    st.write("Impact type selected:", impact_type)
-    
     category_impacts = {
         'Consumo de Energia': 0,
         'Produtos Químicos': 0,
@@ -266,15 +262,53 @@ def calculate_impacts_by_category(inputs, impact_type):
         'Disposição de Lodo': 0,
         'Disposição de Resíduos': 0
     }
+    
+    # Emissões para a Água
+    if 'fosforo_total' in inputs:
+        category_impacts['Emissões para a Água'] += inputs['fosforo_total'] * IMPACT_FACTORS.get('fosforo_total', {}).get(impact_type, 0)
+    
+    if 'nitrogenio_total' in inputs:
+        category_impacts['Emissões para a Água'] += inputs['nitrogenio_total'] * IMPACT_FACTORS.get('nitrogenio_total', {}).get(impact_type, 0)
+    
+    # Emissões Atmosféricas
+    if 'metano' in inputs:
+        category_impacts['Emissões Atmosféricas'] += inputs['metano'] * IMPACT_FACTORS.get('metano', {}).get(impact_type, 0)
+    
+    if 'dioxido_carbono' in inputs:
+        category_impacts['Emissões Atmosféricas'] += inputs['dioxido_carbono'] * IMPACT_FACTORS.get('dioxido_carbono', {}).get(impact_type, 0)
+    
+    if 'oxido_nitroso' in inputs:
+        category_impacts['Emissões Atmosféricas'] += inputs['oxido_nitroso'] * IMPACT_FACTORS.get('oxido_nitroso', {}).get(impact_type, 0)
+    
+    # Transportes
+    if 'ton_km_factor' in inputs:
+        category_impacts['Transportes'] += inputs['ton_km_factor'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
+    
+    if 'ton_km_factor_lodo' in inputs:
+        category_impacts['Transportes'] += inputs['ton_km_factor_lodo'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
+    
+    # Disposição de Lodo
+    if 'quantidade_lodo' in inputs and inputs['disposicao_lodo'] == 'Disposição em aterro':
+        category_impacts['Disposição de Lodo'] = inputs['quantidade_lodo'] * IMPACT_FACTORS.get('lodo_aterro', {}).get(impact_type, 0)
+    elif 'quantidade_lodo' in inputs and inputs['disposicao_lodo'] == 'Disposição em lixão':
+        category_impacts['Disposição de Lodo'] = inputs['quantidade_lodo'] * IMPACT_FACTORS.get('lodo_lixao', {}).get(impact_type, 0)
+    
+    # Disposição de Resíduos
+    if 'quantity' in inputs:
+        if inputs['destination'] == 'Aterro Sanitário':
+            category_impacts['Disposição de Resíduos'] = inputs['quantity'] * IMPACT_FACTORS.get('residuos_trat_preliminar_aterro', {}).get(impact_type, 0)
+        else:
+            category_impacts['Disposição de Resíduos'] = inputs['quantity'] * IMPACT_FACTORS.get('residuos_trat_preliminar_lixao', {}).get(impact_type, 0)
 
-    # Calculate impacts
-    for categoria in category_impacts:
-        st.write(f"Calculating for category: {categoria}")
-    
-    # Add final results debug print
-    st.write("Final category impacts:", category_impacts)
-    
-    return category_impacts
+    # Energia e Biogás
+    if 'eletricidade' in inputs:
+        energia = inputs['eletricidade'] * IMPACT_FACTORS.get('eletricidade', {}).get(impact_type, 0)
+        if inputs.get('tipo_queimador') == 'Queimador fechado com reaproveitamento energético' and 'quantidade_biogas' in inputs:
+            energia -= inputs['quantidade_biogas'] * IMPACT_FACTORS.get('eletricidade', {}).get(impact_type, 0)
+        category_impacts['Consumo de Energia'] = energia
+
+    # Remove zero values
+    return {k: v for k, v in category_impacts.items() if abs(v) > 1e-10}
 def group_parameters_by_category(inputs):
     # Define as categorias e seus respectivos parâmetros
     categories = {
