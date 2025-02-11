@@ -631,7 +631,16 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
     with col2:
         inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
-        
+
+# Coloque isso antes do botão 'Calcular Impactos'
+st.markdown("---")
+st.subheader("Análise Detalhada por Categoria")
+impact_selected = st.selectbox(
+    'Selecione o tipo de impacto para visualizar:',
+    ['Ecotoxidade de Água Doce', 'Eutrofização de Água Doce', 'Aquecimento Global', 
+     'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
+)
+
 if st.button('Calcular Impactos'):
     # Primeiro, adicionamos todas as informações do tratamento preliminar ao dicionário inputs
     inputs['quantity'] = quantity
