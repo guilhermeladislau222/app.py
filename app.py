@@ -613,20 +613,6 @@ if st.button('Calcular Impactos'):
     # Mostramos o cabeçalho dos resultados
     st.header('Resultados')
     
-    # Criamos e mostramos os gráficos por categoria de emissão
-    st.header('Gráficos por Categoria de Emissão')
-    
-    # Agrupamos os dados por categoria
-    grouped_data = group_parameters_by_category(inputs)
-    
-    # Criamos os gráficos para cada categoria
-    category_graphs = create_category_graphs(grouped_data)
-    
-    # Exibimos os gráficos em duas colunas
-    cols = st.columns(2)
-    for i, fig in enumerate(category_graphs):
-        with cols[i % 2]:
-            st.plotly_chart(fig, use_container_width=True)
     
     # Criamos o gráfico principal de impactos ambientais
     fig = px.bar(
