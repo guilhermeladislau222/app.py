@@ -681,12 +681,12 @@ if st.button('Calcular Impactos'):
         showlegend=False,
         height=600
     )
+# Mostramos o gráfico principal
+    st.plotly_chart(fig)
     
-    # Mostramos o gráfico principal
-   st.plotly_chart(fig)
     # Adiciona um espaçamento entre os gráficos
-   st.markdown("---")
-   st.subheader("Análise Detalhada por Categoria")
+    st.markdown("---")
+    st.subheader("Análise Detalhada por Categoria")
     
     # Seletor para escolher o tipo de impacto
     impact_selected = st.selectbox(
