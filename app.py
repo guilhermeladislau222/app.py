@@ -603,9 +603,7 @@ if st.button('Calcular Impactos'):
         list(results.items()), 
         columns=['Categoria de Impacto', 'Valor']
     )
-   
-    # Mostramos a tabela com todos os resultados
-    st.table(df_results)
+    
     # Mapeamos os nomes das categorias para seus nomes completos com unidades
     df_results['Categoria de Impacto'] = df_results['Categoria de Impacto'].map(IMPACT_NAMES)
     
