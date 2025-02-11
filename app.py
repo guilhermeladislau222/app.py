@@ -655,9 +655,7 @@ if st.button('Calcular Impactos'):
     
     # Calculamos os impactos usando nossa função modificada
     results = calculate_impacts(inputs)
-    
     # Criamos um DataFrame para mostrar os resultados
-    # Convertemos o dicionário de resultados em um formato tabular
     df_results = pd.DataFrame(
         list(results.items()), 
         columns=['Categoria de Impacto', 'Valor']
@@ -672,8 +670,7 @@ if st.button('Calcular Impactos'):
     # Mostramos o cabeçalho dos resultados
     st.header('Resultados')
     
-    
-    # Criamos o gráfico principal de impactos ambientais
+    # Criamos o gráfico principal
     fig = px.bar(
         df_results, 
         x='Categoria de Impacto', 
@@ -691,110 +688,52 @@ if st.button('Calcular Impactos'):
         showlegend=False,
         height=600
     )
-# Mostramos o gráfico principal
+    
+    # Mostramos o gráfico principal
     st.plotly_chart(fig)
     
-    # Adiciona um espaçamento entre os gráficos
+    # Análise Detalhada por Categoria
     st.markdown("---")
     st.subheader("Análise Detalhada por Categoria")
-    # NOVO: Adiciona feedback visual
-st.info("Calculando impactos por categoria...")
-
-impact_selected = st.selectbox(
-   'Selecione o tipo de impacto para visualizar:',
-   ['Ecotoxidade de Água Doce', 'Eutrofização de Água Doce', 'Aquecimento Global', 
-    'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
-)
-
-# Calcula os impactos por categoria usando nossa nova função
-category_impacts = {
-   'Consumo de Energia': 0,
-   'Produtos Químicos': 0, 
-   'Transportes': 0,
-   'Emissões para a Água': 0,
-   'Emissões Atmosféricas': 0,
-   'Disposição de Lodo': 0,
-   'Disposição de Resíduos': 0
-}
-
-# Produtos Químicos
-chemical_products = ['cloreto_ferrico', 'sulfato_ferro', 'policloreto_aluminio', 
-                   'sulfato_aluminio', 'hipoclorito_sodio', 'cal', 'hidroxido_sodio']
-for product in chemical_products:
-   if product in inputs:
-       category_impacts['Produtos Químicos'] += inputs[product] * IMPACT_FACTORS.get(product, {}).get(impact_selected, 0)
-
-# Emissões para a Água
-water_emissions = ['fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio', 
-                 'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel']
-for emission in water_emissions:
-   if emission in inputs:
-       category_impacts['Emissões para a Água'] += inputs[emission] * IMPACT_FACTORS.get(emission, {}).get(impact_selected, 0)
-
-# Emissões Atmosféricas
-if 'metano' in inputs:
-   category_impacts['Emissões Atmosféricas'] += inputs['metano'] * IMPACT_FACTORS.get('metano', {}).get(impact_selected, 0)
-if 'dioxido_carbono' in inputs:
-   category_impacts['Emissões Atmosféricas'] += inputs['dioxido_carbono'] * IMPACT_FACTORS.get('dioxido_carbono', {}).get(impact_selected, 0)
-if 'oxido_nitroso' in inputs:
-   category_impacts['Emissões Atmosféricas'] += inputs['oxido_nitroso'] * IMPACT_FACTORS.get('oxido_nitroso', {}).get(impact_selected, 0)
-
-# Consumo de Energia
-if 'eletricidade' in inputs:
-   category_impacts['Consumo de Energia'] = inputs['eletricidade'] * IMPACT_FACTORS.get('eletricidade', {}).get(impact_selected, 0)
-
-# Transportes
-if 'ton_km_factor' in inputs:
-   category_impacts['Transportes'] += inputs['ton_km_factor'] * IMPACT_FACTORS.get('transportes', {}).get(impact_selected, 0)
-if 'ton_km_factor_lodo' in inputs:
-   category_impacts['Transportes'] += inputs['ton_km_factor_lodo'] * IMPACT_FACTORS.get('transportes', {}).get(impact_selected, 0)
-
-# Disposição de Lodo
-if 'quantidade_lodo' in inputs and 'disposicao_lodo' in inputs:
-   if inputs['disposicao_lodo'] == 'Disposição em aterro':
-       category_impacts['Disposição de Lodo'] = inputs['quantidade_lodo'] * IMPACT_FACTORS.get('lodo_aterro', {}).get(impact_selected, 0)
-   elif inputs['disposicao_lodo'] == 'Disposição em lixão':
-       category_impacts['Disposição de Lodo'] = inputs['quantidade_lodo'] * IMPACT_FACTORS.get('lodo_lixao', {}).get(impact_selected, 0)
-
-# Disposição de Resíduos
-if 'quantity' in inputs and 'destination' in inputs:
-   if inputs['destination'] == 'Aterro Sanitário':
-       category_impacts['Disposição de Resíduos'] = inputs['quantity'] * IMPACT_FACTORS.get('residuos_trat_preliminar_aterro', {}).get(impact_selected, 0)
-   else:
-       category_impacts['Disposição de Resíduos'] = inputs['quantity'] * IMPACT_FACTORS.get('residuos_trat_preliminar_lixao', {}).get(impact_selected, 0)
-
-# Remove categorias com valor zero e cria DataFrame
-category_impacts = {k: v for k, v in category_impacts.items() if abs(v) > 1e-10}
-
-if category_impacts:
-   df_categories = pd.DataFrame(
-       list(category_impacts.items()),
-       columns=['Categoria', 'Impacto']
-   )
-   
-   fig_categories = px.bar(
-       df_categories,
-       x='Categoria',
-       y='Impacto',
-       title=f'Contribuição por Categoria para {impact_selected}',
-       labels={'Impacto': IMPACT_NAMES[impact_selected]},
-       color='Categoria'
-   )
-   
-   fig_categories.update_layout(
-       xaxis_title="Categoria",
-       yaxis_title=f"Impacto ({IMPACT_NAMES[impact_selected].split('(')[1].strip(')')})",
-       xaxis={'categoryorder':'total descending'},
-       xaxis_tickangle=-45,
-       showlegend=False,
-       height=500,
-       margin=dict(b=150, l=100)
-   )
-   
-   st.plotly_chart(fig_categories)
-   st.success("Análise detalhada concluída!")
-else:
-   st.warning("Não há dados suficientes para mostrar o gráfico detalhado para esta categoria de impacto.")
-
-# Mostramos a tabela com todos os resultados
-st.table(df_results)
+    st.info("Calculando impactos por categoria...")
+    
+    impact_selected = st.selectbox(
+        'Selecione o tipo de impacto para visualizar:',
+        ['Ecotoxidade de Água Doce', 'Eutrofização de Água Doce', 'Aquecimento Global', 
+         'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
+    )
+    
+    category_impacts = calculate_impacts_by_category(inputs, impact_selected)
+    
+    if category_impacts:
+        df_categories = pd.DataFrame(
+            list(category_impacts.items()),
+            columns=['Categoria', 'Impacto']
+        )
+        
+        fig_categories = px.bar(
+            df_categories,
+            x='Categoria',
+            y='Impacto',
+            title=f'Contribuição por Categoria para {impact_selected}',
+            labels={'Impacto': IMPACT_NAMES[impact_selected]},
+            color='Categoria'
+        )
+        
+        fig_categories.update_layout(
+            xaxis_title="Categoria",
+            yaxis_title=f"Impacto ({IMPACT_NAMES[impact_selected].split('(')[1].strip(')')})",
+            xaxis={'categoryorder':'total descending'},
+            xaxis_tickangle=-45,
+            showlegend=False,
+            height=500,
+            margin=dict(b=150, l=100)
+        )
+        
+        st.plotly_chart(fig_categories)
+        st.success("Análise detalhada concluída!")
+    else:
+        st.warning("Não há dados suficientes para mostrar o gráfico detalhado para esta categoria de impacto.")
+    
+    # Mostramos a tabela com todos os resultados
+    st.table(df_results)
