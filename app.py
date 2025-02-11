@@ -642,7 +642,7 @@ if st.button('Calcular Impactos'):
          'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
     )
     
-    # Criamos os dados para o novo gráfico
+    # Definimos as categorias e seus parâmetros
     emission_categories = {
         'Consumo de Eletricidade': ['eletricidade'],
         'Consumo de produtos químicos': ['cloreto_ferrico', 'sulfato_ferro', 'policloreto_aluminio', 
@@ -657,14 +657,19 @@ if st.button('Calcular Impactos'):
         'Emissões de resíduos': ['residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao']
     }
     
-    # Calculamos o impacto por categoria
+    # Calculamos o impacto por categoria com tratamento de erro
     category_impacts = {}
     for category, parameters in emission_categories.items():
         total_impact = 0
         for param in parameters:
-            if param in inputs and param in IMPACT_FACTORS:
-                if impact_selected in IMPACT_FACTORS[param]:
-                    total_impact += inputs[param] * IMPACT_FACTORS[param][impact_selected]
+            try:
+                if param in inputs and param in IMPACT_FACTORS:
+                    impact_value = IMPACT_FACTORS[param].get(impact_selected, 0)
+                    param_value = inputs.get(param, 0)
+                    total_impact += param_value * impact_value
+            except Exception as e:
+                st.warning(f"Erro ao processar {param}: {str(e)}")
+                continue
         category_impacts[category] = total_impact
     
     # Criamos o DataFrame para o novo gráfico
