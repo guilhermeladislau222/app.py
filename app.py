@@ -635,68 +635,6 @@ if st.button('Calcular Impactos'):
     
     # Mostramos o gráfico principal
     st.plotly_chart(fig)
-# Criamos um seletor para escolher o tipo de impacto
-    impact_selected = st.selectbox(
-        'Selecione o tipo de impacto para visualizar:',
-        ['Ecotoxidade de Água Doce', 'Eutrofização de Água Doce', 'Aquecimento Global', 
-         'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
-    )
-    
-    # Definimos as categorias e seus parâmetros
-    emission_categories = {
-        'Consumo de Eletricidade': ['eletricidade'],
-        'Consumo de produtos químicos': ['cloreto_ferrico', 'sulfato_ferro', 'policloreto_aluminio', 
-                                       'sulfato_aluminio', 'hipoclorito_sodio', 'acido_paracetico',
-                                       'peroxido_hidrogenio', 'cal', 'hidroxido_sodio', 'nitrato_calcio', 
-                                       'sulfato_sodio'],
-        'Transportes': ['transportes'],
-        'Emissões do efluente': ['fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio',
-                                'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel'],
-        'Emissões de gases': ['metano', 'oxido_nitroso', 'dioxido_carbono'],
-        'Emissões do lodo': ['lodo_aterro', 'lodo_lixao'],
-        'Emissões de resíduos': ['residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao']
-    }
-    
-    # Calculamos o impacto por categoria com tratamento de erro
-    category_impacts = {}
-    for category, parameters in emission_categories.items():
-        total_impact = 0
-        for param in parameters:
-            try:
-                if param in inputs and param in IMPACT_FACTORS:
-                    impact_value = IMPACT_FACTORS[param].get(impact_selected, 0)
-                    param_value = inputs.get(param, 0)
-                    total_impact += param_value * impact_value
-            except Exception as e:
-                st.warning(f"Erro ao processar {param}: {str(e)}")
-                continue
-        category_impacts[category] = total_impact
-    
-    # Criamos o DataFrame para o novo gráfico
-    df_categories = pd.DataFrame(list(category_impacts.items()), 
-                               columns=['Categoria', 'Impacto'])
-    
-    # Criamos o gráfico de barras para a categoria selecionada
-    fig_categories = px.bar(
-        df_categories,
-        x='Categoria',
-        y='Impacto',
-        title=f'Contribuição por Categoria para {impact_selected}',
-        labels={'Impacto': IMPACT_NAMES[impact_selected]},
-        color='Categoria'
-    )
-    
-    # Personalizamos o layout
-    fig_categories.update_layout(
-        xaxis_title="Categoria",
-        yaxis_title=f"Impacto ({IMPACT_NAMES[impact_selected].split('(')[1].strip(')')})",
-        xaxis={'categoryorder':'total descending'},
-        showlegend=False,
-        height=500
-    )
-    
-    # Mostramos o novo gráfico
-    st.plotly_chart(fig_categories)
     
     # Mostramos a tabela com todos os resultados
     st.table(df_results)
