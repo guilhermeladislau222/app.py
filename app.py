@@ -700,15 +700,47 @@ if st.button('Calcular Impactos'):
     
     # Mostramos o gráfico principal
     st.plotly_chart(fig)
-    
+    # Criamos tabela de contribuições por categoria
+    st.subheader("Tabela de Contribuições por Categoria")
+    df_categories_all = pd.DataFrame({
+        'Categoria': ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
+                     'Emissões para a Água', 'Emissões Atmosféricas', 
+                     'Disposição de Lodo', 'Disposição de Resíduos'],
+        'Impacto': [category_impacts.get('Consumo de Energia', 0),
+                   category_impacts.get('Produtos Químicos', 0),
+                   category_impacts.get('Transportes', 0),
+                   category_impacts.get('Emissões para a Água', 0),
+                   category_impacts.get('Emissões Atmosféricas', 0),
+                   category_impacts.get('Disposição de Lodo', 0),
+                   category_impacts.get('Disposição de Resíduos', 0)]
+    })
+    st.table(df_categories_all)
     # Análise Detalhada por Categoria
-    
     category_impacts = calculate_impacts_by_category(inputs, impact_selected)
     
     if category_impacts:
+        # Criamos tabela de contribuições por categoria
+        st.subheader("Tabela de Contribuições por Categoria")
+        df_categories_all = pd.DataFrame({
+            'Categoria': ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
+                         'Emissões para a Água', 'Emissões Atmosféricas', 
+                         'Disposição de Lodo', 'Disposição de Resíduos'],
+            'Impacto': [category_impacts.get('Consumo de Energia', 0),
+                       category_impacts.get('Produtos Químicos', 0),
+                       category_impacts.get('Transportes', 0),
+                       category_impacts.get('Emissões para a Água', 0),
+                       category_impacts.get('Emissões Atmosféricas', 0),
+                       category_impacts.get('Disposição de Lodo', 0),
+                       category_impacts.get('Disposição de Resíduos', 0)]
+        })
+        st.table(df_categories_all)
+
+        # Força exibição de todas as categorias no gráfico
         df_categories = pd.DataFrame(
-            list(category_impacts.items()),
-            columns=['Categoria', 'Impacto']
+            [{'Categoria': cat, 'Impacto': category_impacts.get(cat, 0)} 
+             for cat in ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
+                        'Emissões para a Água', 'Emissões Atmosféricas', 
+                        'Disposição de Lodo', 'Disposição de Resíduos']]
         )
         
         fig_categories = px.bar(
@@ -727,7 +759,8 @@ if st.button('Calcular Impactos'):
             xaxis_tickangle=-45,
             showlegend=False,
             height=500,
-            margin=dict(b=150, l=100)
+            margin=dict(b=150, l=100),
+            showallticklabels=True
         )
         
         st.plotly_chart(fig_categories)
