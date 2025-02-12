@@ -719,7 +719,7 @@ if st.button('Calcular Impactos'):
                        category_impacts.get('Disposição de Lodo', 0),
                        category_impacts.get('Disposição de Resíduos', 0)]
         })
-        st.table(df_categories_all)
+        st.table(df_results)
 
         # Força exibição de todas as categorias no gráfico
         df_categories = pd.DataFrame(
@@ -754,4 +754,4 @@ if st.button('Calcular Impactos'):
         st.warning("Não há dados suficientes para mostrar o gráfico detalhado para esta categoria de impacto.")
     
     # Mostramos a tabela com todos os resultados
-    st.table(df_results)
+    st.table(df_categories_all)
