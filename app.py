@@ -513,34 +513,9 @@ st.info('Os impactos em cada categoria são diferentes de acordo com a destinaç
 ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2e}')
 
-# ... (código anterior mantido igual)
-
 # UASB (deve ser pré-selecionado segundo o fernando)
 st.subheader('Tratamento UASB')
 st.write('O tratamento UASB está pré-selecionado.')
-
-# Campos para UASB
-col1, col2 = st.columns(2)
-with col1:
-    inputs['uasb_eletricidade'] = number_input_scientific_with_tip(
-        'Consumo de Energia UASB (kWh/m³)', 
-        value=0.0, 
-        step=0.001,
-        tip="UASB: 3.58E-03"
-    )
-    inputs['uasb_metano'] = number_input_scientific_with_tip(
-        'Emissão de Metano UASB (kg/m³)',
-        value=0.0,
-        step=0.001,
-        tip="UASB: 3.11E-02"
-    )
-with col2:
-    inputs['uasb_dioxido_carbono'] = number_input_scientific_with_tip(
-        'Emissão de CO2 UASB (kg/m³)',
-        value=0.0,
-        step=0.001,
-        tip="UASB: 1.68E-02"
-    )
 
 # Processos adicionais 
 st.subheader('Processos Adicionais')
@@ -550,63 +525,6 @@ additional_processes = st.multiselect(
      'Filtro Biológico percolador + Decantador Segundario', 
      'Lagoa de Polimento']
 )
-
-# Campos específicos para cada processo adicional
-if 'Wetland de Fluxo Vertical' in additional_processes:
-    st.write('Parâmetros do Wetland')
-    col1, col2 = st.columns(2)
-    with col1:
-        inputs['wetland_eletricidade'] = number_input_scientific_with_tip(
-            'Consumo de Energia Wetland (kWh/m³)',
-            value=0.0,
-            step=0.001,
-            tip="UASB+Wetland: 2.46E-01"
-        )
-    with col2:
-        inputs['wetland_oxido_nitroso'] = number_input_scientific_with_tip(
-            'Emissão de N2O Wetland (kg/m³)',
-            value=0.0,
-            step=0.001,
-            tip="UASB+Wetland: 1.70E-05"
-        )
-
-if 'Filtro Biológico percolador + Decantador Segundario' in additional_processes:
-    st.write('Parâmetros do FBP')
-    col1, col2 = st.columns(2)
-    with col1:
-        inputs['fbp_eletricidade'] = number_input_scientific_with_tip(
-            'Consumo de Energia FBP (kWh/m³)',
-            value=0.0,
-            step=0.001,
-            tip="UASB+FBP: 9.60E-01"
-        )
-    with col2:
-        inputs['fbp_oxido_nitroso'] = number_input_scientific_with_tip(
-            'Emissão de N2O FBP (kg/m³)',
-            value=0.0,
-            step=0.001,
-            tip="UASB+FBP: 1.00E-03"
-        )
-
-if 'Lagoa de Polimento' in additional_processes:
-    st.write('Parâmetros da Lagoa de Polimento')
-    col1, col2 = st.columns(2)
-    with col1:
-        inputs['lagoa_eletricidade'] = number_input_scientific_with_tip(
-            'Consumo de Energia Lagoa (kWh/m³)',
-            value=0.0,
-            step=0.001,
-            tip="UASB+LP: 2.46E-01"
-        )
-    with col2:
-        inputs['lagoa_nitrogenio_amoniacal'] = number_input_scientific_with_tip(
-            'Emissão de N-NH3 Lagoa (kg/m³)',
-            value=0.0,
-            step=0.001,
-            tip="UASB+LP: 5.80E-04"
-        )
-
-# ... (resto do código mantido igual)
 
 # Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
 st.header('Passo 2: Inventário do ciclo de vida')
