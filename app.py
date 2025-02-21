@@ -512,20 +512,36 @@ st.info('Os impactos em cada categoria são diferentes de acordo com a destinaç
 
 ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2e}')
-
 # UASB (deve ser pré-selecionado segundo o fernando)
 st.subheader('Tratamento UASB')
 st.write('O tratamento UASB está pré-selecionado.')
 
-# Processos adicionais 
-st.subheader('Processos Adicionais')
-additional_processes = st.multiselect(
-    'Selecione o(s) Processo(s) Adicional(is)',
-    ['Wetland de Fluxo Vertical', 
-     'Filtro Biológico percolador + Decantador Segundario', 
-     'Lagoa de Polimento']
-)
+# Create columns for UASB inputs
+col1, col2 = st.columns(2)
 
+with col1:
+    st.write("Parâmetros Operacionais")
+    inputs['uasb_vazao'] = number_input_scientific('Vazão (m³/dia)', value=0.0, step=1.0)
+    inputs['uasb_temp'] = number_input_scientific('Temperatura (°C)', value=25.0, step=0.1)
+    inputs['uasb_tdh'] = number_input_scientific('Tempo de Detenção Hidráulica (h)', value=8.0, step=0.1)
+
+with col2:
+    st.write("Parâmetros de Eficiência")
+    inputs['uasb_dqo_removal'] = number_input_scientific('Eficiência Remoção DQO (%)', value=0.0, step=1.0)
+    inputs['uasb_dbo_removal'] = number_input_scientific('Eficiência Remoção DBO (%)', value=0.0, step=1.0)
+    inputs['uasb_sst_removal'] = number_input_scientific('Eficiência Remoção SST (%)', value=0.0, step=1.0)
+
+# Additional UASB parameters
+st.write("Parâmetros de Produção")
+col3, col4 = st.columns(2)
+
+with col3:
+    inputs['uasb_biogas_prod'] = number_input_scientific('Produção de Biogás (m³/dia)', value=0.0, step=0.1)
+    inputs['uasb_metano_conc'] = number_input_scientific('Concentração de Metano no Biogás (%)', value=0.0, step=1.0)
+
+with col4:
+    inputs['uasb_lodo_prod'] = number_input_scientific('Produção de Lodo (kgSST/dia)', value=0.0, step=0.1)
+    inputs['uasb_ph'] = number_input_scientific('pH do Efluente', value=7.0, step=0.1)
 # Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
 st.header('Passo 2: Inventário do ciclo de vida')
 
