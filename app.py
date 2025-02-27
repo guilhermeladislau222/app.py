@@ -492,7 +492,7 @@ def calculate_impacts(inputs):
     return results
     
 st.title('Avaliação do Ciclo de Vida para ETE')
-
+inputs = {}
 # Passo 1: Processo de Tratamento
 st.header('Passo 1: Processo de Tratamento')
 
@@ -545,7 +545,7 @@ with col4:
 # Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
 st.header('Passo 2: Inventário do ciclo de vida')
 
-inputs = {}
+####
 
 st.subheader('Consumo de Energia')
 inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1)
