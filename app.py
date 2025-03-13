@@ -1020,9 +1020,9 @@ if st.button('Calcular Impactos'):
     st.plotly_chart(fig)
     
     # Análise Detalhada por Categoria
-    category_impacts = calculate_impacts_by_category(inputs, impact_selected)
-    
-    if category_impacts:
+category_impacts = calculate_impacts_by_category(inputs, impact_selected)
+
+if category_impacts:
     # Criamos tabela de contribuições por categoria (apenas uma vez)
     st.subheader("Tabela de Contribuições por Categoria")
     df_categories_all = pd.DataFrame({
