@@ -842,14 +842,32 @@ elif tipo_queimador == 'Queimador aberto':
         inputs['oxido_nitroso'] = number_input_with_suggestion('Óxido Nitroso (kg/m³)', value=0.0, step=0.001, key="oxido_nitroso", selected_scenario=selected_scenario)
 
 # Coloque isso antes do botão 'Calcular Impactos'
+# Adicione esta seção antes do botão 'Calcular Impactos'
 st.markdown("---")
-st.subheader("Análise Detalhada por Categoria")
-impact_selected = st.selectbox(
-    'Selecione o tipo de impacto para visualizar:',
-    ['Ecotoxidade de Água Doce', 'Eutrofização de Água Doce', 'Aquecimento Global', 
-     'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
-)
+st.subheader("Opções de Visualização")
 
+# Criamos duas colunas para organizar os controles
+viz_col1, viz_col2 = st.columns(2)
+
+with viz_col1:
+    st.write("Selecione as categorias de impacto para visualizar:")
+    # Criamos checkboxes para todas as categorias de impacto
+    impact_options = {}
+    for impact in IMPACT_NAMES.keys():
+        # Por padrão, 'Uso da Terra' vem desmarcado, os outros vêm marcados
+        default_value = impact != 'Uso da Terra'
+        impact_options[impact] = st.checkbox(IMPACT_NAMES[impact], value=default_value, key=f"check_{impact}")
+
+with viz_col2:
+    st.subheader("Análise Detalhada")
+    # Seletor de impacto para a visualização detalhada
+    impact_selected = st.selectbox(
+        'Selecione o tipo de impacto para visualizar detalhes:',
+        ['Ecotoxidade de Água Doce', 'Eutrofização de Água Doce', 'Aquecimento Global', 
+         'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
+    )
+
+# Botão para calcular os impactos
 if st.button('Calcular Impactos'):
     # Primeiro, adicionamos todas as informações do tratamento preliminar ao dicionário inputs
     inputs['quantity'] = quantity
@@ -873,9 +891,14 @@ if st.button('Calcular Impactos'):
     
     # Calculamos os impactos usando nossa função modificada
     results = calculate_impacts(inputs)
-    # Criamos um DataFrame para mostrar os resultados
+    
+    # Filtramos os resultados com base nas categorias selecionadas
+    selected_impacts = [impact for impact, selected in impact_options.items() if selected]
+    filtered_results = {k: v for k, v in results.items() if k in selected_impacts}
+    
+    # Criamos DataFrame com apenas as categorias selecionadas
     df_results = pd.DataFrame(
-        list(results.items()), 
+        list(filtered_results.items()), 
         columns=['Categoria de Impacto', 'Valor']
     )
     
@@ -885,82 +908,125 @@ if st.button('Calcular Impactos'):
     # Garantimos que todos os valores são numéricos
     df_results['Valor'] = pd.to_numeric(df_results['Valor'], errors='coerce')
     
-    # Mostramos o cabeçalho dos resultados
-    st.header('Resultados')
-    
-    # Criamos o gráfico principal
-    fig = px.bar(
-        df_results, 
-        x='Categoria de Impacto', 
-        y='Valor',
-        title='Impactos Ambientais por Categoria',
-        labels={'Valor': 'Impacto'},
-        color='Categoria de Impacto'
-    )
-    
-    # Personalizamos o layout do gráfico principal
-    fig.update_layout(
-        xaxis_title="Categoria de Impacto",
-        yaxis_title="Valor do Impacto",
-        xaxis={'categoryorder':'total descending'},
-        showlegend=False,
-        height=600
-    )
-    
-    # Mostramos o gráfico principal
-    st.plotly_chart(fig)
-    
-    # Análise Detalhada por Categoria
-    category_impacts = calculate_impacts_by_category(inputs, impact_selected)
-    
-    if category_impacts:
-        # Criamos tabela de contribuições por categoria (apenas uma vez)
-        st.subheader("Tabela de Contribuições por Categoria")
-        df_categories_all = pd.DataFrame({
-            'Categoria': ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
-                         'Emissões para a Água', 'Emissões Atmosféricas', 
-                         'Disposição de Lodo', 'Disposição de Resíduos'],
-            'Impacto': [category_impacts.get('Consumo de Energia', 0),
-                       category_impacts.get('Produtos Químicos', 0),
-                       category_impacts.get('Transportes', 0),
-                       category_impacts.get('Emissões para a Água', 0),
-                       category_impacts.get('Emissões Atmosféricas', 0),
-                       category_impacts.get('Disposição de Lodo', 0),
-                       category_impacts.get('Disposição de Resíduos', 0)]
-        })
-        st.table(df_categories_all)
-
-        # Força exibição de todas as categorias no gráfico
-        df_categories = pd.DataFrame(
-            [{'Categoria': cat, 'Impacto': category_impacts.get(cat, 0)} 
-             for cat in ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
-                        'Emissões para a Água', 'Emissões Atmosféricas', 
-                        'Disposição de Lodo', 'Disposição de Resíduos']]
+    # Verificamos se temos dados para mostrar
+    if len(df_results) > 0:
+        # Mostramos o cabeçalho dos resultados
+        st.header('Resultados')
+        
+        # Criamos o gráfico principal com um estilo visual melhorado
+        fig = px.bar(
+            df_results, 
+            x='Categoria de Impacto', 
+            y='Valor',
+            title='Impactos Ambientais por Categoria',
+            labels={'Valor': 'Valor do Impacto'},
+            color='Categoria de Impacto',
+            color_discrete_sequence=px.colors.qualitative.Bold,  # Cores mais vibrantes
+            template="plotly_white"  # Fundo branco com linhas de grade suaves
         )
         
-        fig_categories = px.bar(
-            df_categories,
-            x='Categoria',
-            y='Impacto',
-            title=f'Contribuição por Categoria para {impact_selected}',
-            labels={'Impacto': IMPACT_NAMES[impact_selected]},
-            color='Categoria'
-        )
-        
-        fig_categories.update_layout(
-            xaxis_title="Categoria",
-            yaxis_title=f"Impacto ({IMPACT_NAMES[impact_selected].split('(')[1].strip(')')})",
+        # Personalizamos o layout do gráfico principal
+        fig.update_layout(
+            xaxis_title="Categoria de Impacto",
+            yaxis_title="Valor do Impacto",
             xaxis={'categoryorder':'total descending'},
-            xaxis_tickangle=-45,
             showlegend=False,
             height=500,
-            margin=dict(b=150, l=100)
+            margin=dict(t=50, b=100, l=100, r=30),
+            title_font=dict(size=20, family="Arial", color="#333333"),
+            font=dict(family="Arial", size=14),
+            xaxis_tickangle=-45,  # Ângulo dos rótulos do eixo x para melhor legibilidade
+            plot_bgcolor='white',  # Fundo branco
+            bargap=0.3  # Espaçamento entre barras
         )
         
-        st.plotly_chart(fig_categories)
-        st.success("Análise detalhada concluída!")
-    else:
-        st.warning("Não há dados suficientes para mostrar o gráfico detalhado para esta categoria de impacto.")
+        # Adiciona linhas de grade horizontais suaves para facilitar a leitura dos valores
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor='lightgray',
+            gridwidth=0.5
+        )
+        
+        # Remove linhas de grade verticais para um visual mais limpo
+        fig.update_xaxes(
+            showgrid=False
+        )
+        
+        # Mostramos o gráfico principal
+        st.plotly_chart(fig, use_container_width=True)  # Utiliza a largura total do container
+        
+        # Análise Detalhada por Categoria
+        category_impacts = calculate_impacts_by_category(inputs, impact_selected)
+        
+        if category_impacts:
+            # Criamos tabela de contribuições por categoria (apenas uma vez)
+            st.subheader("Tabela de Contribuições por Categoria")
+            df_categories_all = pd.DataFrame({
+                'Categoria': ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
+                             'Emissões para a Água', 'Emissões Atmosféricas', 
+                             'Disposição de Lodo', 'Disposição de Resíduos'],
+                'Impacto': [category_impacts.get('Consumo de Energia', 0),
+                           category_impacts.get('Produtos Químicos', 0),
+                           category_impacts.get('Transportes', 0),
+                           category_impacts.get('Emissões para a Água', 0),
+                           category_impacts.get('Emissões Atmosféricas', 0),
+                           category_impacts.get('Disposição de Lodo', 0),
+                           category_impacts.get('Disposição de Resíduos', 0)]
+            })
+            st.table(df_categories_all)
     
-    # Mostramos a tabela com todos os resultados
-    st.table(df_results)
+            # Força exibição de todas as categorias no gráfico
+            df_categories = pd.DataFrame(
+                [{'Categoria': cat, 'Impacto': category_impacts.get(cat, 0)} 
+                 for cat in ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
+                            'Emissões para a Água', 'Emissões Atmosféricas', 
+                            'Disposição de Lodo', 'Disposição de Resíduos']]
+            )
+            
+            # Cria o gráfico de categorias com estilo melhorado
+            fig_categories = px.bar(
+                df_categories,
+                x='Categoria',
+                y='Impacto',
+                title=f'Contribuição por Categoria para {impact_selected}',
+                labels={'Impacto': IMPACT_NAMES[impact_selected]},
+                color='Categoria',
+                color_discrete_sequence=px.colors.qualitative.Bold,
+                template="plotly_white"
+            )
+            
+            fig_categories.update_layout(
+                xaxis_title="Categoria",
+                yaxis_title=f"Impacto ({IMPACT_NAMES[impact_selected].split('(')[1].strip(')')})",
+                xaxis={'categoryorder':'total descending'},
+                xaxis_tickangle=-45,
+                showlegend=False,
+                height=500,
+                margin=dict(t=50, b=160, l=100, r=30),
+                title_font=dict(size=18, family="Arial", color="#333333"),
+                font=dict(family="Arial", size=14),
+                plot_bgcolor='white',
+                bargap=0.3
+            )
+            
+            # Adiciona linhas de grade horizontais
+            fig_categories.update_yaxes(
+                showgrid=True,
+                gridcolor='lightgray',
+                gridwidth=0.5
+            )
+            
+            # Remove linhas de grade verticais
+            fig_categories.update_xaxes(
+                showgrid=False
+            )
+            
+            st.plotly_chart(fig_categories, use_container_width=True)
+            st.success("Análise detalhada concluída!")
+        else:
+            st.warning("Não há dados suficientes para mostrar o gráfico detalhado para esta categoria de impacto.")
+        
+        # Mostramos a tabela com todos os resultados
+        st.table(df_results)
+    else:
+        st.warning("Nenhuma categoria de impacto selecionada para visualização.")
