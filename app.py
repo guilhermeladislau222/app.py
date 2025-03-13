@@ -838,6 +838,7 @@ with tab1:
         # Mostramos a tabela com todos os resultados
         st.table(df_categories_all)
 
+# Quando estiver na aba "Somente UASB", modifique os widgets para terem prefixos únicos
 with tab2:
     st.header("Avaliação usando apenas UASB")
     st.info("Esta aba permite avaliar os impactos dos diferentes tipos de UASB baseados no documento fornecido.")
@@ -845,13 +846,15 @@ with tab2:
     # Seleção do tipo de UASB
     tipo_uasb = st.selectbox(
         'Selecione o tipo de sistema UASB',
-        ['UASB', 'UASB+FBP', 'UASB+Wetland', 'UASB+LP', 'Reaproveitamento Biogas']
+        ['UASB', 'UASB+FBP', 'UASB+Wetland', 'UASB+LP', 'Reaproveitamento Biogas'],
+        key="uasb_tab_tipo_uasb"  # Adicionando uma key única
     )
     
     # Selecionar tipo de disposição de lodo
     tipo_disposicao_lodo = st.selectbox(
         'Selecione o tipo de disposição de lodo',
-        ['Lodo para Aterro (UASB/UASB+Wetland/UASB+LP)', 'Lodo para Aterro (UASB+FBP)']
+        ['Lodo para Aterro (UASB/UASB+Wetland/UASB+LP)', 'Lodo para Aterro (UASB+FBP)'],
+        key="uasb_tab_tipo_disposicao"  # Adicionando uma key única
     )
     
     st.write(f"Valores padrão para {tipo_uasb}:")
@@ -865,23 +868,27 @@ with tab2:
     col1, col2 = st.columns(2)
     
     with col1:
-        inputs['eletricidade'] = number_input_scientific(
+        # Adicionando prefixo "uasb_tab_" aos IDs para evitar conflitos
+        eletricidade_uasb = number_input_scientific(
             'Eletricidade (kWh/m³)', 
             value=uasb_inputs.get('eletricidade', 0.0),
-            step=0.001
+            step=0.001,
+            key="uasb_tab_eletricidade"  # Usando key para tornar o widget único
         )
         
     with col2:
-        inputs['transportes'] = number_input_scientific(
+        transportes_uasb = number_input_scientific(
             'Transportes (kg.km)', 
             value=uasb_inputs.get('transportes', 0.0),
-            step=0.1
+            step=0.1,
+            key="uasb_tab_transportes"  # Usando key para tornar o widget único
         )
         
-    inputs['uso_terra'] = number_input_scientific(
+    uso_terra_uasb = number_input_scientific(
         'Uso da Terra (m²)', 
         value=uasb_inputs.get('uso_terra', 0.0), 
-        step=0.1
+        step=0.1,
+        key="uasb_tab_uso_terra"  # Usando key para tornar o widget único
     )
     
     # Parâmetros adicionais que podem ser relevantes
@@ -889,27 +896,55 @@ with tab2:
     
     col1, col2 = st.columns(2)
     
+    quantidade_biogas_uasb = 0.0
+    dioxido_carbono_uasb = 0.0
+    lodo_prod_uasb = 0.0
+    
     with col1:
         if tipo_uasb == 'Reaproveitamento Biogas':
-            inputs['quantidade_biogas'] = number_input_scientific(
+            quantidade_biogas_uasb = number_input_scientific(
                 'Produção de Biogás (m³/dia)', 
                 value=0.0, 
-                step=0.1
+                step=0.1,
+                key="uasb_tab_biogas"  # Usando key para tornar o widget único
             )
-            inputs['dioxido_carbono'] = number_input_scientific(
+            dioxido_carbono_uasb = number_input_scientific(
                 'Dióxido de Carbono (kg/m³)', 
                 value=0.0, 
-                step=0.001
+                step=0.001,
+                key="uasb_tab_co2"  # Usando key para tornar o widget único
             )
     
     with col2:
         if 'FBP' in tipo_uasb:
-            inputs['lodo_prod'] = number_input_scientific(
+            lodo_prod_uasb = number_input_scientific(
                 'Produção de Lodo (kgSST/dia)', 
                 value=0.0, 
-                step=0.1
+                step=0.1,
+                key="uasb_tab_lodo_prod"  # Usando key para tornar o widget único
             )
     
+    # Calcular impactos
+    if st.button('Calcular Impactos para UASB', key="uasb_tab_calcular"):
+        # Criamos um novo dicionário de inputs para esta aba
+        uasb_tab_inputs = {}
+        
+        # Adicionamos os valores específicos desta aba
+        uasb_tab_inputs['eletricidade'] = eletricidade_uasb
+        uasb_tab_inputs['transportes'] = transportes_uasb
+        uasb_tab_inputs['uso_terra'] = uso_terra_uasb
+        
+        if tipo_uasb == 'Reaproveitamento Biogas':
+            uasb_tab_inputs['quantidade_biogas'] = quantidade_biogas_uasb
+            uasb_tab_inputs['dioxido_carbono'] = dioxido_carbono_uasb
+            
+        if 'FBP' in tipo_uasb:
+            uasb_tab_inputs['lodo_prod'] = lodo_prod_uasb
+            
+        # Calculamos os impactos usando o dicionário específico desta aba
+        results = calculate_impacts(uasb_tab_inputs)
+        
+        # Resto do código para exibir os resultados...
     # Calcular impactos
     if st.button('Calcular Impactos para UASB'):
         # Calculamos os impactos usando nossa função modificada
