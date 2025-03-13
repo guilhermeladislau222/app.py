@@ -253,6 +253,7 @@ IMPACT_NAMES = {
 }
 
 # Valores padrão baseados no documento PDF
+# Valores padrão baseados no documento PDF
 DEFAULT_VALUES = {
     'UASB': {
         'eletricidade': 3.58E-03,
@@ -425,8 +426,8 @@ def parse_scientific_notation(value):
     except ValueError:
         return 0.0
 
-def number_input_scientific(label, value=0.0, step=0.1):
-    value_input = st.text_input(label, value=str(value))
+def number_input_scientific(label, value=0.0, step=0.1, key=None):
+    value_input = st.text_input(label, value=str(value), key=key)
     return parse_scientific_notation(value_input)
 
 def calculate_impacts(inputs):
@@ -536,10 +537,10 @@ with tab1:
 
     col1, col2 = st.columns(2)
     with col1:
-        distance = number_input_scientific('Distância para o transporte de resíduos (Ida e Volta) (km)', value=0.0, step=0.1)
-        quantity = number_input_scientific('Quantidade de resíduos (ton/m³)', value=0.0, step=0.001)
+        distance = number_input_scientific('Distância para o transporte de resíduos (Ida e Volta) (km)', value=0.0, step=0.1, key="main_distance")
+        quantity = number_input_scientific('Quantidade de resíduos (ton/m³)', value=0.0, step=0.001, key="main_quantity")
     with col2:
-        destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'])
+        destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'], key="main_destination")
 
     st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
     st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
@@ -556,27 +557,27 @@ with tab1:
 
     with col1:
         st.write("Parâmetros Operacionais")
-        inputs['uasb_vazao'] = number_input_scientific('Vazão (m³/dia)', value=0.0, step=1.0)
-        inputs['uasb_temp'] = number_input_scientific('Temperatura (°C)', value=25.0, step=0.1)
-        inputs['uasb_tdh'] = number_input_scientific('Tempo de Detenção Hidráulica (h)', value=8.0, step=0.1)
+        inputs['uasb_vazao'] = number_input_scientific('Vazão (m³/dia)', value=0.0, step=1.0, key="main_uasb_vazao")
+        inputs['uasb_temp'] = number_input_scientific('Temperatura (°C)', value=25.0, step=0.1, key="main_uasb_temp")
+        inputs['uasb_tdh'] = number_input_scientific('Tempo de Detenção Hidráulica (h)', value=8.0, step=0.1, key="main_uasb_tdh")
 
     with col2:
         st.write("Parâmetros de Eficiência")
-        inputs['uasb_dqo_removal'] = number_input_scientific('Eficiência Remoção DQO (%)', value=0.0, step=1.0)
-        inputs['uasb_dbo_removal'] = number_input_scientific('Eficiência Remoção DBO (%)', value=0.0, step=1.0)
-        inputs['uasb_sst_removal'] = number_input_scientific('Eficiência Remoção SST (%)', value=0.0, step=1.0)
+        inputs['uasb_dqo_removal'] = number_input_scientific('Eficiência Remoção DQO (%)', value=0.0, step=1.0, key="main_uasb_dqo")
+        inputs['uasb_dbo_removal'] = number_input_scientific('Eficiência Remoção DBO (%)', value=0.0, step=1.0, key="main_uasb_dbo")
+        inputs['uasb_sst_removal'] = number_input_scientific('Eficiência Remoção SST (%)', value=0.0, step=1.0, key="main_uasb_sst")
 
     # Additional UASB parameters
     st.write("Parâmetros de Produção")
     col3, col4 = st.columns(2)
 
     with col3:
-        inputs['uasb_biogas_prod'] = number_input_scientific('Produção de Biogás (m³/dia)', value=0.0, step=0.1)
-        inputs['uasb_metano_conc'] = number_input_scientific('Concentração de Metano no Biogás (%)', value=0.0, step=1.0)
+        inputs['uasb_biogas_prod'] = number_input_scientific('Produção de Biogás (m³/dia)', value=0.0, step=0.1, key="main_uasb_biogas")
+        inputs['uasb_metano_conc'] = number_input_scientific('Concentração de Metano no Biogás (%)', value=0.0, step=1.0, key="main_uasb_metano")
 
     with col4:
-        inputs['uasb_lodo_prod'] = number_input_scientific('Produção de Lodo (kgSST/dia)', value=0.0, step=0.1)
-        inputs['uasb_ph'] = number_input_scientific('pH do Efluente', value=7.0, step=0.1)
+        inputs['uasb_lodo_prod'] = number_input_scientific('Produção de Lodo (kgSST/dia)', value=0.0, step=0.1, key="main_uasb_lodo")
+        inputs['uasb_ph'] = number_input_scientific('pH do Efluente', value=7.0, step=0.1, key="main_uasb_ph")
 
     # Processos adicionais 
     st.subheader('Processos Adicionais')
@@ -584,7 +585,8 @@ with tab1:
         'Selecione o(s) Processo(s) Adicional(is)',
         ['Wetland de Fluxo Vertical', 
          'Filtro Biológico percolador + Decantador Segundario', 
-         'Lagoa de Polimento']
+         'Lagoa de Polimento'],
+        key="main_processes"
     )
 
     # Passo 2: Inventário do ciclo de vida
@@ -595,46 +597,47 @@ with tab1:
     
     col1, col2 = st.columns(2)
     with col1:
-        inputs['cloreto_ferrico'] = number_input_scientific('Cloreto Férrico (kg/m³)', value=0.0, step=0.001)
-        inputs['policloreto_aluminio'] = number_input_scientific('Policloreto de Alumínio (kg/m³)', value=0.0, step=0.001)
-        inputs['sulfato_aluminio'] = number_input_scientific('Sulfato de Alumínio (kg/m³)', value=0.0, step=0.001)
-        inputs['hipoclorito_sodio'] = number_input_scientific('Hipoclorito de Sódio (kg/m³)', value=0.0, step=0.001)
-        inputs['acido_paracetico'] = number_input_scientific('Ácido Paracético (kg/m³)', value=0.0, step=0.001)
+        inputs['cloreto_ferrico'] = number_input_scientific('Cloreto Férrico (kg/m³)', value=0.0, step=0.001, key="main_cloreto")
+        inputs['policloreto_aluminio'] = number_input_scientific('Policloreto de Alumínio (kg/m³)', value=0.0, step=0.001, key="main_poli")
+        inputs['sulfato_aluminio'] = number_input_scientific('Sulfato de Alumínio (kg/m³)', value=0.0, step=0.001, key="main_sulfato_al")
+        inputs['hipoclorito_sodio'] = number_input_scientific('Hipoclorito de Sódio (kg/m³)', value=0.0, step=0.001, key="main_hipoclorito")
+        inputs['acido_paracetico'] = number_input_scientific('Ácido Paracético (kg/m³)', value=0.0, step=0.001, key="main_acido")
     
     with col2:
-        inputs['peroxido_hidrogenio'] = number_input_scientific('Peróxido de Hidrogênio (kg/m³)', value=0.0, step=0.001)
-        inputs['cal'] = number_input_scientific('Cal (kg/m³)', value=0.0, step=0.001)
-        inputs['hidroxido_sodio'] = number_input_scientific('Hidróxido de Sódio (kg/m³)', value=0.0, step=0.001)
-        inputs['nitrato_calcio'] = number_input_scientific('Nitrato de Cálcio (kg/m³)', value=0.0, step=0.001)
-        inputs['sulfato_sodio'] = number_input_scientific('Sulfato de Sódio (kg/m³)', value=0.0, step=0.001)
+        inputs['peroxido_hidrogenio'] = number_input_scientific('Peróxido de Hidrogênio (kg/m³)', value=0.0, step=0.001, key="main_peroxido")
+        inputs['cal'] = number_input_scientific('Cal (kg/m³)', value=0.0, step=0.001, key="main_cal")
+        inputs['hidroxido_sodio'] = number_input_scientific('Hidróxido de Sódio (kg/m³)', value=0.0, step=0.001, key="main_hidroxido")
+        inputs['nitrato_calcio'] = number_input_scientific('Nitrato de Cálcio (kg/m³)', value=0.0, step=0.001, key="main_nitrato")
+        inputs['sulfato_sodio'] = number_input_scientific('Sulfato de Sódio (kg/m³)', value=0.0, step=0.001, key="main_sulfato_na")
 
     # Transportes e Uso da Terra
     st.subheader('Transportes e Uso da Terra')
     col1, col2 = st.columns(2)
     with col1:
-        inputs['transportes'] = number_input_scientific('Transportes (kg.km)', value=0.0, step=0.1)
+        inputs['transportes'] = number_input_scientific('Transportes (kg.km)', value=0.0, step=0.1, key="main_transportes")
     with col2:
-        inputs['uso_terra'] = number_input_scientific('Uso da Terra (m²)', value=0.0, step=0.1)
+        inputs['uso_terra'] = number_input_scientific('Uso da Terra (m²)', value=0.0, step=0.1, key="main_uso_terra")
 
     st.subheader('Consumo de Energia')
-    inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1)
+    inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1, key="main_eletricidade")
 
     st.subheader('Emissões para a Água')
-    inputs['fosforo_total'] = number_input_scientific('Fósforo Total (kg/m³)', value=0.0, step=0.001)
-    inputs['nitrogenio_total'] = number_input_scientific('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
+    inputs['fosforo_total'] = number_input_scientific('Fósforo Total (kg/m³)', value=0.0, step=0.001, key="main_fosforo")
+    inputs['nitrogenio_total'] = number_input_scientific('Nitrogênio Total (kg/m³)', value=0.0, step=0.001, key="main_nitrogenio")
 
     st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
-    if st.checkbox('Mostrar mais'):
+    if st.checkbox('Mostrar mais', key="main_mostrar_mais"):
         optional_params = ['bario', 'cobre', 'selenio', 'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel']
-        for param in optional_params:
-            inputs[param.lower()] = number_input_scientific(f'{param.capitalize()} (kg/m³)', value=0.0, step=0.0001)
+        for i, param in enumerate(optional_params):
+            inputs[param.lower()] = number_input_scientific(f'{param.capitalize()} (kg/m³)', value=0.0, step=0.0001, key=f"main_opt_{i}")
 
     # Passo 3: Disposição do Lodo
     st.header('Passo 3: Disposição do Lodo')
 
     disposicao_lodo = st.selectbox(
         'Escolha o método de disposição do lodo',
-        ['Disposição em aterro', 'Disposição em lixão', 'Ferti-irrigação ou agricultura']
+        ['Disposição em aterro', 'Disposição em lixão', 'Ferti-irrigação ou agricultura'],
+        key="main_disposicao_lodo"
     )
 
     if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
@@ -642,9 +645,9 @@ with tab1:
         
         col1, col2 = st.columns(2)
         with col1:
-            distancia_lodo = number_input_scientific('Distância para o transporte do lodo (Ida e Volta) (km)', value=0.0, step=0.1)
+            distancia_lodo = number_input_scientific('Distância para o transporte do lodo (Ida e Volta) (km)', value=0.0, step=0.1, key="main_distancia_lodo")
         with col2:
-            quantidade_lodo = number_input_scientific('Quantidade de lodo (ton/m³)', value=0.0, step=0.001)
+            quantidade_lodo = number_input_scientific('Quantidade de lodo (ton/m³)', value=0.0, step=0.001, key="main_quantidade_lodo")
         
         ton_km_factor_lodo = distancia_lodo * quantidade_lodo
         st.write(f'Fator ton.km para o lodo: {ton_km_factor_lodo:.2e}')
@@ -654,12 +657,12 @@ with tab1:
         
         col1, col2 = st.columns(2)
         with col1:
-            inputs['lodo_fosforo'] = number_input_scientific('Fósforo (kg/m³)', value=0.0, step=0.001)
+            inputs['lodo_fosforo'] = number_input_scientific('Fósforo (kg/m³)', value=0.0, step=0.001, key="main_lodo_p")
         with col2:
-            inputs['lodo_nitrogenio'] = number_input_scientific('Nitrogênio Amoniacal (kg/m³)', value=0.0, step=0.001)
+            inputs['lodo_nitrogenio'] = number_input_scientific('Nitrogênio Amoniacal (kg/m³)', value=0.0, step=0.001, key="main_lodo_n")
         
         st.write("Elementos adicionais (opcionais)")
-        if st.checkbox('Mostrar elementos do lodo'):
+        if st.checkbox('Mostrar elementos do lodo', key="main_mostrar_lodo"):
             # Lista de elementos usando nomes padronizados (sem acentos, minúsculos)
             elementos_adicionais = [
                 'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
@@ -667,14 +670,15 @@ with tab1:
             ]
             
             # Para cada elemento, criamos um campo de entrada
-            for elemento in elementos_adicionais:
+            for i, elemento in enumerate(elementos_adicionais):
                 # Criamos a chave do input com prefixo 'lodo_'
                 input_key = f'lodo_{elemento}'
                 # Criamos o campo de entrada, capitalizando o nome do elemento para exibição
                 inputs[input_key] = number_input_scientific(
                     f'Lodo - {elemento.capitalize()} (kg/m³)', 
                     value=0.0, 
-                    step=0.0001
+                    step=0.0001,
+                    key=f"main_lodo_elem_{i}"
                 )
         
     # Passo 4: Queima de Biogás
@@ -682,12 +686,13 @@ with tab1:
 
     tipo_queimador = st.selectbox(
         'Escolha o tipo de queimador',
-        ['Queimador aberto', 'Queimador fechado com reaproveitamento energético']
+        ['Queimador aberto', 'Queimador fechado com reaproveitamento energético'],
+        key="main_queimador"
     )
 
     if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
         st.subheader('Emissões do Queimador Fechado')
-        inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
+        inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001, key="main_co2")
         
         # Passo 5 aparece automaticamente quando o queimador fechado é selecionado
         st.header('Passo 5: Reaproveitamento Biogás')
@@ -698,7 +703,8 @@ with tab1:
         inputs['quantidade_biogas'] = number_input_scientific(
             'Eletricidade (kWh.m−3)', 
             value=0.0, 
-            step=0.1
+            step=0.1,
+            key="main_quantidade_biogas"
         )
         
         # Definimos a eficiência como 100% automaticamente
@@ -709,10 +715,10 @@ with tab1:
         
         col1, col2 = st.columns(2)
         with col1:
-            inputs['metano'] = number_input_scientific('Metano (kg/m³)', value=0.0, step=0.001)
-            inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
+            inputs['metano'] = number_input_scientific('Metano (kg/m³)', value=0.0, step=0.001, key="main_metano")
+            inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001, key="main_co2_aberto")
         with col2:
-            inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
+            inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001, key="main_n2o")
 
     # Coloque isso antes do botão 'Calcular Impactos'
     st.markdown("---")
@@ -720,16 +726,17 @@ with tab1:
     impact_selected = st.selectbox(
         'Selecione o tipo de impacto para visualizar:',
         ['Ecotoxidade de Água Doce', 'Eutrofização de Água Doce', 'Aquecimento Global', 
-         'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre']
+         'Uso da Terra', 'Ecotoxidade Marinha', 'Eutrofização Marinha', 'Ecotoxidade Terrestre'],
+        key="main_impact_type"
     )
 
-    if st.button('Calcular Impactos'):
+    if st.button('Calcular Impactos', key="main_calcular"):
         # Primeiro, adicionamos todas as informações do tratamento preliminar ao dicionário inputs
         inputs['quantity'] = quantity
         inputs['destination'] = destination
         inputs['ton_km_factor'] = ton_km_factor
         
-        # Adicionamos as informações do lodo dependendo do tipo de disposição
+      # Adicionamos as informações do lodo dependendo do tipo de disposição
         if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
             # Para aterro e lixão, precisamos da disposição, quantidade e transporte
             inputs['disposicao_lodo'] = disposicao_lodo
@@ -746,6 +753,7 @@ with tab1:
         
         # Calculamos os impactos usando nossa função modificada
         results = calculate_impacts(inputs)
+        
         # Criamos um DataFrame para mostrar os resultados
         df_results = pd.DataFrame(
             list(results.items()), 
@@ -787,7 +795,7 @@ with tab1:
         category_impacts = calculate_impacts_by_category(inputs, impact_selected)
         
         if category_impacts:
-            # Criamos tabela de contribuições por categoria (apenas uma vez)
+            # Criamos tabela de contribuições por categoria
             st.subheader("Tabela de Contribuições por Categoria")
             df_categories_all = pd.DataFrame({
                 'Categoria': ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
@@ -801,6 +809,9 @@ with tab1:
                            category_impacts.get('Disposição de Lodo', 0),
                            category_impacts.get('Disposição de Resíduos', 0)]
             })
+            
+            # Mostramos a tabela com os resultados gerais
+            st.subheader("Tabela de Resultados por Categoria de Impacto")
             st.table(df_results)
 
             # Força exibição de todas as categorias no gráfico
@@ -831,14 +842,15 @@ with tab1:
             )
             
             st.plotly_chart(fig_categories)
+            
+            # Mostramos a tabela de contribuições por categoria
+            st.subheader("Tabela de Contribuições Detalhadas")
+            st.table(df_categories_all)
+            
             st.success("Análise detalhada concluída!")
         else:
             st.warning("Não há dados suficientes para mostrar o gráfico detalhado para esta categoria de impacto.")
-        
-        # Mostramos a tabela com todos os resultados
-        st.table(df_categories_all)
 
-# Quando estiver na aba "Somente UASB", modifique os widgets para terem prefixos únicos
 with tab2:
     st.header("Avaliação usando apenas UASB")
     st.info("Esta aba permite avaliar os impactos dos diferentes tipos de UASB baseados no documento fornecido.")
@@ -847,14 +859,14 @@ with tab2:
     tipo_uasb = st.selectbox(
         'Selecione o tipo de sistema UASB',
         ['UASB', 'UASB+FBP', 'UASB+Wetland', 'UASB+LP', 'Reaproveitamento Biogas'],
-        key="uasb_tab_tipo_uasb"  # Adicionando uma key única
+        key="uasb_tab_tipo_uasb"
     )
     
     # Selecionar tipo de disposição de lodo
     tipo_disposicao_lodo = st.selectbox(
         'Selecione o tipo de disposição de lodo',
         ['Lodo para Aterro (UASB/UASB+Wetland/UASB+LP)', 'Lodo para Aterro (UASB+FBP)'],
-        key="uasb_tab_tipo_disposicao"  # Adicionando uma key única
+        key="uasb_tab_tipo_disposicao"
     )
     
     st.write(f"Valores padrão para {tipo_uasb}:")
@@ -868,12 +880,12 @@ with tab2:
     col1, col2 = st.columns(2)
     
     with col1:
-        # Adicionando prefixo "uasb_tab_" aos IDs para evitar conflitos
+        # Usando variáveis locais para armazenar os valores
         eletricidade_uasb = number_input_scientific(
             'Eletricidade (kWh/m³)', 
             value=uasb_inputs.get('eletricidade', 0.0),
             step=0.001,
-            key="uasb_tab_eletricidade"  # Usando key para tornar o widget único
+            key="uasb_tab_eletricidade"
         )
         
     with col2:
@@ -881,14 +893,14 @@ with tab2:
             'Transportes (kg.km)', 
             value=uasb_inputs.get('transportes', 0.0),
             step=0.1,
-            key="uasb_tab_transportes"  # Usando key para tornar o widget único
+            key="uasb_tab_transportes"
         )
         
     uso_terra_uasb = number_input_scientific(
         'Uso da Terra (m²)', 
         value=uasb_inputs.get('uso_terra', 0.0), 
         step=0.1,
-        key="uasb_tab_uso_terra"  # Usando key para tornar o widget único
+        key="uasb_tab_uso_terra"
     )
     
     # Parâmetros adicionais que podem ser relevantes
@@ -896,6 +908,7 @@ with tab2:
     
     col1, col2 = st.columns(2)
     
+    # Inicializa variáveis locais
     quantidade_biogas_uasb = 0.0
     dioxido_carbono_uasb = 0.0
     lodo_prod_uasb = 0.0
@@ -906,13 +919,13 @@ with tab2:
                 'Produção de Biogás (m³/dia)', 
                 value=0.0, 
                 step=0.1,
-                key="uasb_tab_biogas"  # Usando key para tornar o widget único
+                key="uasb_tab_biogas"
             )
             dioxido_carbono_uasb = number_input_scientific(
                 'Dióxido de Carbono (kg/m³)', 
                 value=0.0, 
                 step=0.001,
-                key="uasb_tab_co2"  # Usando key para tornar o widget único
+                key="uasb_tab_co2"
             )
     
     with col2:
@@ -921,7 +934,7 @@ with tab2:
                 'Produção de Lodo (kgSST/dia)', 
                 value=0.0, 
                 step=0.1,
-                key="uasb_tab_lodo_prod"  # Usando key para tornar o widget único
+                key="uasb_tab_lodo_prod"
             )
     
     # Calcular impactos
@@ -943,12 +956,6 @@ with tab2:
             
         # Calculamos os impactos usando o dicionário específico desta aba
         results = calculate_impacts(uasb_tab_inputs)
-        
-        # Resto do código para exibir os resultados...
-    # Calcular impactos
-    if st.button('Calcular Impactos para UASB'):
-        # Calculamos os impactos usando nossa função modificada
-        results = calculate_impacts(inputs)
         
         # Criamos um DataFrame para mostrar os resultados
         df_results = pd.DataFrame(
