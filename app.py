@@ -509,22 +509,35 @@ def parse_scientific_notation(value):
 
 def number_input_with_suggestion(label, value=0.0, step=0.1, key=None, selected_scenario='Somente UASB'):
     """
-    Cria um campo de entrada com um botão de sugestão ao lado
+    Cria um campo de entrada com um botão de sugestão ao lado que atualiza o valor quando clicado
     """
+    # Inicializa o estado da sessão para este campo específico, se ainda não existir
+    if f"state_{key}" not in st.session_state:
+        st.session_state[f"state_{key}"] = str(value)
+    
+    # Função para atualizar o valor quando o botão de sugestão for clicado
+    def update_value():
+        if key in SCENARIO_VALUES[selected_scenario]:
+            st.session_state[f"state_{key}"] = str(SCENARIO_VALUES[selected_scenario][key])
+    
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        value_input = st.text_input(label, value=str(value), key=key)
+        value_input = st.text_input(
+            label, 
+            value=st.session_state[f"state_{key}"],
+            key=f"input_{key}"
+        )
+        # Atualiza o estado da sessão quando o usuário digitar um novo valor
+        st.session_state[f"state_{key}"] = value_input
         parsed_value = parse_scientific_notation(value_input)
     
     with col2:
         # Verifica se há um valor sugerido para este campo no cenário selecionado
         if key in SCENARIO_VALUES[selected_scenario]:
             suggested_value = SCENARIO_VALUES[selected_scenario][key]
-            if st.button(f"Sugerir: {suggested_value:.2e}", key=f"btn_{key}"):
-                # Não tentamos atualizar o campo diretamente, pois isso causaria erros
-                # O usuário verá o valor sugerido e poderá copiá-lo manualmente
-                pass
+            if st.button(f"Sugerir: {suggested_value:.2e}", key=f"btn_{key}", on_click=update_value):
+                pass  # A ação é executada pelo on_click
     
     return parsed_value
 
