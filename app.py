@@ -626,6 +626,82 @@ with uasb_tab2:
     
     # Campos para exibir e permitir ajustes nos valores padrão
     col1, col2 = st.columns(2)
+    with col1:
+        st.write("Parâmetros Operacionais")
+        inputs['uasb_vazao'] = number_input_scientific('Vazão (m³/dia)', value=0.0, step=1.0, key="main_uasb_vazao")
+        inputs['uasb_temp'] = number_input_scientific('Temperatura (°C)', value=25.0, step=0.1, key="main_uasb_temp")
+        inputs['uasb_tdh'] = number_input_scientific('Tempo de Detenção Hidráulica (h)', value=8.0, step=0.1, key="main_uasb_tdh")
+
+    with col2:
+        st.write("Parâmetros de Eficiência")
+        inputs['uasb_dqo_removal'] = number_input_scientific('Eficiência Remoção DQO (%)', value=100.0, step=1.0, key="main_uasb_dqo")
+        inputs['uasb_dbo_removal'] = number_input_scientific('Eficiência Remoção DBO (%)', value=100.0, step=1.0, key="main_uasb_dbo")
+        inputs['uasb_sst_removal'] = number_input_scientific('Eficiência Remoção SST (%)', value=100.0, step=1.0, key="main_uasb_sst")
+
+    # Additional UASB parameters
+    st.write("Parâmetros de Produção")
+    col3, col4 = st.columns(2)
+
+    with col3:
+        inputs['uasb_biogas_prod'] = number_input_scientific('Produção de Biogás (m³/dia)', value=0.0, step=0.1, key="main_uasb_biogas")
+        inputs['uasb_metano_conc'] = number_input_scientific('Concentração de Metano no Biogás (%)', value=0.0, step=1.0, key="main_uasb_metano")
+
+    with col4:
+        inputs['uasb_lodo_prod'] = number_input_scientific('Produção de Lodo (kgSST/dia)', value=0.0, step=0.1, key="main_uasb_lodo")
+        inputs['uasb_ph'] = number_input_scientific('pH do Efluente', value=7.0, step=0.1, key="main_uasb_ph")
+    
+    # Produtos Químicos para UASB
+    st.subheader("Produtos Químicos")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        inputs['cloreto_ferrico'] = number_input_scientific('Cloreto Férrico (kg/m³)', value=0.0, step=0.001, key="main_cloreto_ferrico")
+        inputs['sulfato_ferro'] = number_input_scientific('Sulfato de Ferro (kg/m³)', value=0.0, step=0.001, key="main_sulfato_ferro")
+        inputs['policloreto_aluminio'] = number_input_scientific('Policloreto de Alumínio (kg/m³)', value=0.0, step=0.001, key="main_policloreto_aluminio")
+        inputs['sulfato_aluminio'] = number_input_scientific('Sulfato de Alumínio (kg/m³)', value=0.0, step=0.001, key="main_sulfato_aluminio")
+        inputs['hipoclorito_sodio'] = number_input_scientific('Hipoclorito de Sódio (kg/m³)', value=0.0, step=0.001, key="main_hipoclorito_sodio")
+        
+    with col2:
+        inputs['acido_paracetico'] = number_input_scientific('Ácido Paracético (kg/m³)', value=0.0, step=0.001, key="main_acido_paracetico")
+        inputs['peroxido_hidrogenio'] = number_input_scientific('Peróxido de Hidrogênio (kg/m³)', value=0.0, step=0.001, key="main_peroxido_hidrogenio")
+        inputs['cal'] = number_input_scientific('Cal (kg/m³)', value=0.0, step=0.001, key="main_cal")
+        inputs['hidroxido_sodio'] = number_input_scientific('Hidróxido de Sódio (kg/m³)', value=0.0, step=0.001, key="main_hidroxido_sodio")
+        inputs['nitrato_calcio'] = number_input_scientific('Nitrato de Cálcio (kg/m³)', value=0.0, step=0.001, key="main_nitrato_calcio")
+    
+    # Transportes e Uso da Terra
+    col1, col2 = st.columns(2)
+    with col1:
+        inputs['transportes'] = number_input_scientific('Transportes (kg.km)', value=0.0, step=0.1, key="main_transportes")
+    with col2:
+        inputs['uso_terra'] = number_input_scientific('Uso da Terra (m²)', value=0.0, step=0.1, key="main_uso_terra")
+    
+    # Adiciona outros produtos químicos
+    inputs['sulfato_sodio'] = number_input_scientific('Sulfato de Sódio (kg/m³)', value=0.0, step=0.001, key="main_sulfato_sodio")
+
+with uasb_tab2:
+    st.info("Esta seção permite configurar o UASB com valores pré-definidos baseados no documento de referência.")
+    
+    # Seleção do tipo de UASB
+    tipo_uasb = st.selectbox(
+        'Selecione o tipo de sistema UASB',
+        ['UASB', 'UASB+FBP', 'UASB+Wetland', 'UASB+LP', 'Reaproveitamento Biogas'],
+        key="uasb_tipo"
+    )
+    
+    # Selecionar tipo de disposição de lodo
+    tipo_disposicao_lodo = st.selectbox(
+        'Selecione o tipo de disposição de lodo',
+        ['Lodo para Aterro (UASB/UASB+Wetland/UASB+LP)', 'Lodo para Aterro (UASB+FBP)'],
+        key="uasb_disposicao_lodo"
+    )
+    
+    st.write(f"Valores padrão para {tipo_uasb}:")
+    
+    # Mostrar os valores padrão para o tipo selecionado
+    uasb_values = UASB_VALUES.get(tipo_uasb, {})
+    
+    # Campos para exibir e permitir ajustes nos valores padrão
+    col1, col2 = st.columns(2)
     
     with col1:
         uasb_eletricidade = number_input_scientific(
