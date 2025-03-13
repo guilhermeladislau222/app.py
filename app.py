@@ -888,9 +888,19 @@ if st.button('Calcular Impactos'):
     # Mostramos o cabeçalho dos resultados
     st.header('Resultados')
     
-    # Criamos o gráfico principal
+     # Adicionar uma caixa de seleção múltipla para escolher quais categorias ocultar
+    hidden_categories = st.multiselect(
+        'Selecione as categorias que você NÃO deseja visualizar no gráfico:',
+        options=df_results['Categoria de Impacto'].tolist(),
+        default=[] # Inicialmente nenhuma categoria está oculta
+    )
+
+    # Filtrar o DataFrame para excluir as categorias selecionadas
+    filtered_df = df_results[~df_results['Categoria de Impacto'].isin(hidden_categories)]
+
+    # Criar o gráfico principal com os dados filtrados
     fig = px.bar(
-        df_results, 
+        filtered_df, 
         x='Categoria de Impacto', 
         y='Valor',
         title='Impactos Ambientais por Categoria',
