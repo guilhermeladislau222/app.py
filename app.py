@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Fatoresss para impactos
+# Fatores para impactos
 IMPACT_FACTORS = {
     'eletricidade': {
         'Ecotoxidade de Água Doce': 0.00097,
@@ -265,7 +265,9 @@ def calculate_impacts_by_category(inputs, impact_type):
     
     # Produtos Químicos
     chemical_products = ['cloreto_ferrico', 'sulfato_ferro', 'policloreto_aluminio', 
-                        'sulfato_aluminio', 'hipoclorito_sodio', 'cal', 'hidroxido_sodio']
+                        'sulfato_aluminio', 'hipoclorito_sodio', 'acido_paracetico',
+                        'peroxido_hidrogenio', 'cal', 'hidroxido_sodio', 'nitrato_calcio',
+                        'sulfato_sodio']
     for product in chemical_products:
         if product in inputs:
             category_impacts['Produtos Químicos'] += inputs[product] * IMPACT_FACTORS.get(product, {}).get(impact_type, 0)
@@ -294,6 +296,8 @@ def calculate_impacts_by_category(inputs, impact_type):
         category_impacts['Transportes'] += inputs['ton_km_factor'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
     if 'ton_km_factor_lodo' in inputs:
         category_impacts['Transportes'] += inputs['ton_km_factor_lodo'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
+    if 'transportes_quimicos' in inputs:
+        category_impacts['Transportes'] += inputs['transportes_quimicos'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
 
     # Disposição de Lodo
     if 'quantidade_lodo' in inputs and 'disposicao_lodo' in inputs:
@@ -341,7 +345,7 @@ def group_parameters_by_category(inputs):
         
         # Transportes inclui todos os impactos relacionados ao transporte
         'Transportes': [
-            'transportes'
+            'transportes', 'transportes_quimicos'
         ],
         
         # Emissões evitadas inclui fatores que reduzem impactos
@@ -383,14 +387,6 @@ def create_category_graphs(grouped_data):
             graphs.append(fig)
     
     return graphs
-
-def parse_scientific_notation(value):
-    try:
-        return float(value)
-    except ValueError:
-        return 0.0
-
-# [Mantenha a definição de IMPACT_FACTORS e IMPACT_NAMES como está, não se esqueçaaa
 
 def parse_scientific_notation(value):
     try:
@@ -481,6 +477,11 @@ def calculate_impacts(inputs):
                     for impact, factor in IMPACT_FACTORS['nitrogenio_amoniacal'].items():
                         results[impact] += inputs['lodo_nitrogenio'] * factor
 
+    # Processamento do transporte de produtos químicos
+    if 'transportes_quimicos' in inputs and inputs['transportes_quimicos'] > 0:
+        for impact, factor in IMPACT_FACTORS['transportes'].items():
+            results[impact] += inputs['transportes_quimicos'] * factor
+
     # Nova seção: Processamento do reaproveitamento de biogás
     if ('quantidade_biogas' in inputs and inputs['quantidade_biogas'] > 0):
         # Como a eficiência está fixa em 100%, a energia gerada é igual à quantidade de biogás
@@ -496,7 +497,7 @@ st.title('Avaliação do Ciclo de Vida para ETE')
 # Passo 1: Processo de Tratamento
 st.header('Passo 1: Processo de Tratamento')
 
-# Tratamento Preliminar ( deve ser obrigatório)
+# Tratamento Preliminar (deve ser obrigatório)
 st.subheader('Tratamento Preliminar')
 st.write('O tratamento preliminar é obrigatório.')
 
@@ -521,21 +522,50 @@ st.write('O tratamento UASB está pré-selecionado.')
 st.subheader('Processos Adicionais')
 additional_processes = st.multiselect(
     'Selecione o(s) Processo(s) Adicional(is)',
-    ['Wetland de Fluxo Vertical', 
+    ['Somente UASB',
+     'Wetland de Fluxo Vertical', 
      'Filtro Biológico percolador + Decantador Segundario', 
      'Lagoa de Polimento']
 )
 
-# Passo 2: Inventário do ciclo de vida não se esqueça dos inputs
-st.header('Passo 2: Inventário do ciclo de vida')
+# Nova seção para produtos químicos
+st.header('Produtos Químicos')
+st.write('Selecione os produtos químicos utilizados no tratamento:')
 
-inputs = {}
+# Expandir/colapsar seção de produtos químicos
+show_chemicals = st.checkbox('Mostrar produtos químicos', value=True)
+
+if show_chemicals:
+    inputs = {}  # Inicializa o dicionário de inputs aqui
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        inputs['cloreto_ferrico'] = number_input_scientific('Cloreto Férrico (kg/m³)', value=0.0, step=0.001)
+        inputs['policloreto_aluminio'] = number_input_scientific('Policloreto de Alumínio (kg/m³)', value=0.0, step=0.001)
+        inputs['sulfato_aluminio'] = number_input_scientific('Sulfato de Alumínio (kg/m³)', value=0.0, step=0.001)
+        inputs['acido_paracetico'] = number_input_scientific('Ácido Paracético (kg/m³)', value=0.0, step=0.001)
+    
+    with col2:
+        inputs['hipoclorito_sodio'] = number_input_scientific('Hipoclorito de Sódio (kg/m³)', value=0.0, step=0.001)
+        inputs['peroxido_hidrogenio'] = number_input_scientific('Peróxido de Hidrogênio (kg/m³)', value=0.0, step=0.001)
+        inputs['cal'] = number_input_scientific('Cal (kg/m³)', value=0.0, step=0.001)
+        inputs['hidroxido_sodio'] = number_input_scientific('Hidróxido de Sódio (kg/m³)', value=0.0, step=0.001)
+    
+    with col3:
+        inputs['nitrato_calcio'] = number_input_scientific('Nitrato de Cálcio (kg/m³)', value=0.0, step=0.001)
+        inputs['sulfato_sodio'] = number_input_scientific('Sulfato de Sódio (kg/m³)', value=0.0, step=0.001)
+        inputs['sulfato_ferro'] = number_input_scientific('Sulfato de Ferro (kg/m³)', value=0.0, step=0.001)
+        inputs['transportes_quimicos'] = number_input_scientific('Transporte de Químicos (kg.km)', value=0.0, step=0.1)
+    
+    st.write('Uso da Terra')
+    inputs['uso_terra'] = number_input_scientific('Área utilizada (m²)', value=0.0, step=0.1)
+
+# Passo 2: Inventário do ciclo de vida
+st.header('Passo 2: Inventário do ciclo de vida')
 
 st.subheader('Consumo de Energia')
 inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1)
-
-st.subheader('Uso da Terra')
-inputs['uso_terra'] = number_input_scientific('Área utilizada (m²)', value=0.0, step=0.1)
 
 st.subheader('Emissões para a Água')
 inputs['fosforo_total'] = number_input_scientific('Fósforo Total (kg/m³)', value=0.0, step=0.001)
@@ -543,11 +573,11 @@ inputs['nitrogenio_total'] = number_input_scientific('Nitrogênio Total (kg/m³)
 
 st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
 if st.checkbox('Mostrar mais'):
-    optional_params = ['bario', 'Cobre', 'selenio', 'Zinco', 'Tolueno', 'Cromo', 'Cadmio', 'Chumbo', 'Niquel']
+    optional_params = ['bario', 'cobre', 'selenio', 'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel']
     for param in optional_params:
-        inputs[param.lower()] = number_input_scientific(f'{param} (kg/m³)', value=0.0, step=0.0001)
+        inputs[param.lower()] = number_input_scientific(f'{param.capitalize()} (kg/m³)', value=0.0, step=0.0001)
 
-# Passo 3: Disposição do Lodo   por categoria
+# Passo 3: Disposição do Lodo
 st.header('Passo 3: Disposição do Lodo')
 
 disposicao_lodo = st.selectbox(
