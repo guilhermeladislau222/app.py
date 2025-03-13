@@ -547,6 +547,9 @@ st.write(f'Fator ton.km: {ton_km_factor:.2e}')
 st.subheader('Tratamento UASB')
 st.write('O tratamento UASB está pré-selecionado.')
 
+# Criando as abas para UASB personalizado vs pré-configurado
+uasb_tab1, uasb_tab2 = st.tabs(["UASB Personalizado", "Somente UASB"])
+
 # Abas para UASB personalizado vs pré-configurado
 with uasb_tab1:
     # Create columns for UASB inputs
