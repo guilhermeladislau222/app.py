@@ -251,7 +251,144 @@ IMPACT_NAMES = {
     'Eutrofização Marinha': "Eutrofização Marinha (kg N eq)",
     'Ecotoxidade Terrestre': "Ecotoxidade Terrestre (kg 1,4-DCB)",
 }
-# Adicione as novas funções aqui
+
+# Valores modelos extraídos do PDF para uso como sugestões
+MODELO_VALORES = {
+    # Cenário UASB
+    'uasb': {
+        'eletricidade': 3.58E-03,
+        'fosforo_total': 5.82E-03,
+        'nitrogenio_total': 6.72E-02,
+        'cobre': 2.14E-05,
+        'selenio': 8.00E-06,
+        'zinco': 1.32E-04,
+        'tolueno': 8.51E-03,
+        'cromo': 1.38E-05,
+        'lodo_fosforo': 3.83E-04,
+        'lodo_arsenio': 1.58E-07,
+        'lodo_bario': 7.01E-06,
+        'lodo_cadmio': 6.70E-08,
+        'lodo_chumbo': 1.55E-06,
+        'lodo_cobre': 1.39E-05,
+        'lodo_cromo': 5.09E-06,
+        'lodo_molibdenio': 1.76E-06,
+        'lodo_niquel': 1.52E-06,
+        'lodo_zinco': 6.47E-05,
+        'metano': 3.11E-02,
+        'dioxido_carbono': 1.68E-02,
+        'quantity': 2.55E-02,  # Resíduos Trat. Preliminar
+        'distance': 0.933,  # Valor calculado para produzir ton.km = 2.38E-02
+        'ton_km_factor': 2.38E-02
+    },
+    # Cenário UASB+FBP
+    'uasb_fbp': {
+        'eletricidade': 9.60E-01,
+        'fosforo_total': 4.07E-03,
+        'nitrogenio_total': 4.70E-02,
+        'cobre': 1.06E-05,
+        'selenio': 8.00E-06,
+        'zinco': 4.85E-05,
+        'tolueno': 8.51E-03,
+        'lodo_fosforo': 6.15E-04,
+        'lodo_arsenio': 1.58E-07,
+        'lodo_bario': 7.01E-06,
+        'lodo_cadmio': 6.70E-08,
+        'lodo_chumbo': 1.55E-06,
+        'lodo_cobre': 1.39E-05,
+        'lodo_cromo': 3.00E+00,
+        'lodo_molibdenio': 1.76E-06,
+        'lodo_niquel': 1.52E-06,
+        'lodo_zinco': 6.47E-05,
+        'metano': 3.31E-02,
+        'oxido_nitroso': 1.00E-03,
+        'dioxido_carbono': 1.09E-01,
+        'quantity': 2.55E-02,  # Resíduos Trat. Preliminar
+        'distance': 0.933,  # Valor calculado para produzir ton.km = 2.38E-02
+        'ton_km_factor': 2.38E-02,
+        'quantidade_lodo': 1.71E-01,
+        'distancia_lodo': 2309.94,  # Valor calculado para produzir ton.km = 3.95E+02
+        'ton_km_factor_lodo': 3.95E+02
+    },
+    # Cenário UASB+Wetland
+    'uasb_wetland': {
+        'eletricidade': 2.46E-01,
+        'fosforo_total': 2.57E-03,
+        'nitrogenio_total': 3.51E-02,
+        'cobre': 7.00E-05,
+        'selenio': 8.00E-06,
+        'zinco': 5.00E-04,
+        'tolueno': 8.51E-03,
+        'cadmio': 5.00E-05,
+        'chumbo': 1.57E-03,
+        'niquel': 1.80E-04,
+        'lodo_fosforo': 3.83E-04,
+        'lodo_arsenio': 1.58E-07,
+        'lodo_bario': 7.01E-06,
+        'lodo_cadmio': 6.70E-08,
+        'lodo_chumbo': 1.55E-06,
+        'lodo_cobre': 1.39E-05,
+        'lodo_cromo': 3.00E+00,
+        'lodo_molibdenio': 1.76E-06,
+        'lodo_niquel': 1.52E-06,
+        'lodo_zinco': 6.47E-05,
+        'metano': 3.64E-04,
+        'oxido_nitroso': 1.70E-05,
+        'dioxido_carbono': 2.24E-02,
+        'quantity': 2.55E-02,  # Resíduos Trat. Preliminar
+        'distance': 0.933,  # Valor calculado para produzir ton.km = 2.38E-02
+        'ton_km_factor': 2.38E-02,
+        'quantidade_lodo': 5.87E-02,
+        'distancia_lodo': 538.33,  # Valor calculado para produzir ton.km = 3.16E+01
+        'ton_km_factor_lodo': 3.16E+01
+    },
+    # Cenário UASB+LP
+    'uasb_lp': {
+        'eletricidade': 2.46E-01,
+        'fosforo_total': 3.29E-03,
+        'nitrogenio_total': 3.18E-02,
+        'lodo_fosforo': 3.83E-04,
+        'lodo_arsenio': 1.58E-07,
+        'lodo_bario': 7.01E-06,
+        'lodo_cadmio': 6.70E-08,
+        'lodo_chumbo': 1.55E-06,
+        'lodo_cobre': 1.39E-05,
+        'lodo_cromo': 3.00E+00,
+        'lodo_molibdenio': 1.76E-06,
+        'lodo_niquel': 1.52E-06,
+        'lodo_zinco': 6.47E-05,
+        'metano': 3.11E-02,
+        'nitrogenio_amoniacal': 5.80E-04,
+        'quantity': 2.55E-02,  # Resíduos Trat. Preliminar
+        'distance': 0.933,  # Valor calculado para produzir ton.km = 2.38E-02
+        'ton_km_factor': 2.38E-02,
+        'quantidade_lodo': 5.87E-02,
+        'distancia_lodo': 538.33,  # Valor calculado para produzir ton.km = 3.16E+01
+        'ton_km_factor_lodo': 3.16E+01
+    },
+    # Cenário Reaproveitamento Biogás
+    'reaproveitamento_biogas': {
+        'eletricidade': 1.92E-02,
+        'dioxido_carbono': 4.08E-02,
+        'quantidade_biogas': 4.17E-01
+    }
+}
+
+# Função para criar input com botão de sugestão
+def input_with_suggestion(label, key, value=0.0, step=0.1, sugestoes=None):
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        value_input = st.text_input(label, value=str(value), key=f"input_{key}")
+    
+    with col2:
+        if sugestoes and key in sugestoes:
+            if st.button(f"Sugerir", key=f"sugerir_{key}"):
+                value_input = str(sugestoes[key])
+                st.session_state[f"input_{key}"] = value_input
+    
+    return parse_scientific_notation(value_input)
+
+# Função para calcular impactos por categoria
 def calculate_impacts_by_category(inputs, impact_type):
     category_impacts = {
         'Consumo de Energia': 0,
@@ -315,6 +452,7 @@ def calculate_impacts_by_category(inputs, impact_type):
 
     # Remove categorias com valor zero
     return {k: v for k, v in category_impacts.items() if abs(v) > 1e-10}
+    
 def group_parameters_by_category(inputs):
     # Define as categorias e seus respectivos parâmetros
     categories = {
@@ -393,10 +531,6 @@ def parse_scientific_notation(value):
         return float(value)
     except ValueError:
         return 0.0
-
-def number_input_scientific(label, value=0.0, step=0.1):
-    value_input = st.text_input(label, value=str(value))
-    return parse_scientific_notation(value_input)
 
 def calculate_impacts(inputs):
     # Inicializa o dicionário de resultados com zero para cada categoria de impacto
@@ -494,6 +628,31 @@ def calculate_impacts(inputs):
     
 st.title('Avaliação do Ciclo de Vida para ETE')
 
+# Seleção do cenário para sugestões de valores
+st.sidebar.header("Configurações")
+cenario = st.sidebar.selectbox(
+    "Selecionar cenário para sugestões:",
+    ["Nenhum", "UASB", "UASB+FBP", "UASB+Wetland", "UASB+LP", "Reaproveitamento Biogás"]
+)
+
+# Mapeamento de cenários para dicionários de valores modelo
+cenario_dict = {
+    "UASB": MODELO_VALORES['uasb'],
+    "UASB+FBP": MODELO_VALORES['uasb_fbp'],
+    "UASB+Wetland": MODELO_VALORES['uasb_wetland'],
+    "UASB+LP": MODELO_VALORES['uasb_lp'],
+    "Reaproveitamento Biogás": MODELO_VALORES['reaproveitamento_biogas'],
+    "Nenhum": {}
+}
+
+# Obtém o dicionário de sugestões baseado no cenário selecionado
+sugestoes = cenario_dict[cenario]
+st.sidebar.write(f"Cenário selecionado: {cenario}")
+st.sidebar.info("Clique nos botões 'Sugerir' ao lado dos campos para preencher com valores do cenário selecionado.")
+
+# Inicializa o dicionário de inputs
+inputs = {}
+
 # Passo 1: Processo de Tratamento
 st.header('Passo 1: Processo de Tratamento')
 
@@ -503,16 +662,24 @@ st.write('O tratamento preliminar é obrigatório.')
 
 col1, col2 = st.columns(2)
 with col1:
-    distance = number_input_scientific('Distância para o transporte de resíduos (Ida e Volta) (km)', value=0.0, step=0.1)
-    quantity = number_input_scientific('Quantidade de resíduos (ton/m³)', value=0.0, step=0.001)
+    distance = input_with_suggestion('Distância para o transporte de resíduos (Ida e Volta) (km)', 'distance', value=0.0, step=0.1, sugestoes=sugestoes)
+    quantity = input_with_suggestion('Quantidade de resíduos (ton/m³)', 'quantity', value=0.0, step=0.001, sugestoes=sugestoes)
 with col2:
     destination = st.selectbox('Destino dos resíduos', ['Lixão', 'Aterro Sanitário'])
 
 st.info('A quantidade é multiplicada pelo km, isso dá o fator em ton.km')
 st.info('Os impactos em cada categoria são diferentes de acordo com a destinação.')
 
+# Se os valores de distância e quantidade foram sugeridos, calcule o ton_km_factor
+# Caso contrário, deixe o usuário definir ton_km_factor diretamente
 ton_km_factor = distance * quantity
 st.write(f'Fator ton.km: {ton_km_factor:.2e}')
+
+# Botão para sugerir ton_km_factor diretamente se disponível no cenário
+if 'ton_km_factor' in sugestoes:
+    if st.button("Sugerir ton.km", key="sugerir_ton_km"):
+        ton_km_factor = sugestoes['ton_km_factor']
+        st.write(f'Fator ton.km sugerido: {ton_km_factor:.2e}')
 
 # UASB (deve ser pré-selecionado segundo o fernando)
 st.subheader('Tratamento UASB')
@@ -536,46 +703,58 @@ st.write('Selecione os produtos químicos utilizados no tratamento:')
 show_chemicals = st.checkbox('Mostrar produtos químicos', value=True)
 
 if show_chemicals:
-    inputs = {}  # Inicializa o dicionário de inputs aqui
-    
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        inputs['cloreto_ferrico'] = number_input_scientific('Cloreto Férrico (kg/m³)', value=0.0, step=0.001)
-        inputs['policloreto_aluminio'] = number_input_scientific('Policloreto de Alumínio (kg/m³)', value=0.0, step=0.001)
-        inputs['sulfato_aluminio'] = number_input_scientific('Sulfato de Alumínio (kg/m³)', value=0.0, step=0.001)
-        inputs['acido_paracetico'] = number_input_scientific('Ácido Paracético (kg/m³)', value=0.0, step=0.001)
+        inputs['cloreto_ferrico'] = input_with_suggestion('Cloreto Férrico (kg/m³)', 'cloreto_ferrico', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['policloreto_aluminio'] = input_with_suggestion('Policloreto de Alumínio (kg/m³)', 'policloreto_aluminio', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['sulfato_aluminio'] = input_with_suggestion('Sulfato de Alumínio (kg/m³)', 'sulfato_aluminio', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['acido_paracetico'] = input_with_suggestion('Ácido Paracético (kg/m³)', 'acido_paracetico', value=0.0, step=0.001, sugestoes=sugestoes)
     
     with col2:
-        inputs['hipoclorito_sodio'] = number_input_scientific('Hipoclorito de Sódio (kg/m³)', value=0.0, step=0.001)
-        inputs['peroxido_hidrogenio'] = number_input_scientific('Peróxido de Hidrogênio (kg/m³)', value=0.0, step=0.001)
-        inputs['cal'] = number_input_scientific('Cal (kg/m³)', value=0.0, step=0.001)
-        inputs['hidroxido_sodio'] = number_input_scientific('Hidróxido de Sódio (kg/m³)', value=0.0, step=0.001)
+        inputs['hipoclorito_sodio'] = input_with_suggestion('Hipoclorito de Sódio (kg/m³)', 'hipoclorito_sodio', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['peroxido_hidrogenio'] = input_with_suggestion('Peróxido de Hidrogênio (kg/m³)', 'peroxido_hidrogenio', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['cal'] = input_with_suggestion('Cal (kg/m³)', 'cal', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['hidroxido_sodio'] = input_with_suggestion('Hidróxido de Sódio (kg/m³)', 'hidroxido_sodio', value=0.0, step=0.001, sugestoes=sugestoes)
     
     with col3:
-        inputs['nitrato_calcio'] = number_input_scientific('Nitrato de Cálcio (kg/m³)', value=0.0, step=0.001)
-        inputs['sulfato_sodio'] = number_input_scientific('Sulfato de Sódio (kg/m³)', value=0.0, step=0.001)
-        inputs['sulfato_ferro'] = number_input_scientific('Sulfato de Ferro (kg/m³)', value=0.0, step=0.001)
-        inputs['transportes_quimicos'] = number_input_scientific('Transporte de Químicos (kg.km)', value=0.0, step=0.1)
+        inputs['nitrato_calcio'] = input_with_suggestion('Nitrato de Cálcio (kg/m³)', 'nitrato_calcio', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['sulfato_sodio'] = input_with_suggestion('Sulfato de Sódio (kg/m³)', 'sulfato_sodio', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['sulfato_ferro'] = input_with_suggestion('Sulfato de Ferro (kg/m³)', 'sulfato_ferro', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['transportes_quimicos'] = input_with_suggestion('Transporte de Químicos (kg.km)', 'transportes_quimicos', value=0.0, step=0.1, sugestoes=sugestoes)
     
     st.write('Uso da Terra')
-    inputs['uso_terra'] = number_input_scientific('Área utilizada (m²)', value=0.0, step=0.1)
+    inputs['uso_terra'] = input_with_suggestion('Área utilizada (m²)', 'uso_terra', value=0.0, step=0.1, sugestoes=sugestoes)
 
 # Passo 2: Inventário do ciclo de vida
 st.header('Passo 2: Inventário do ciclo de vida')
 
 st.subheader('Consumo de Energia')
-inputs['eletricidade'] = number_input_scientific('Eletricidade (kWh/m³)', value=0.0, step=0.1)
+inputs['eletricidade'] = input_with_suggestion('Eletricidade (kWh/m³)', 'eletricidade', value=0.0, step=0.1, sugestoes=sugestoes)
 
 st.subheader('Emissões para a Água')
-inputs['fosforo_total'] = number_input_scientific('Fósforo Total (kg/m³)', value=0.0, step=0.001)
-inputs['nitrogenio_total'] = number_input_scientific('Nitrogênio Total (kg/m³)', value=0.0, step=0.001)
+inputs['fosforo_total'] = input_with_suggestion('Fósforo Total (kg/m³)', 'fosforo_total', value=0.0, step=0.001, sugestoes=sugestoes)
+inputs['nitrogenio_total'] = input_with_suggestion('Nitrogênio Total (kg/m³)', 'nitrogenio_total', value=0.0, step=0.001, sugestoes=sugestoes)
 
 st.write("Os outros parâmetros são opcionais. Clique em 'Mostrar mais' para exibi-los.")
 if st.checkbox('Mostrar mais'):
-    optional_params = ['bario', 'cobre', 'selenio', 'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel']
-    for param in optional_params:
-        inputs[param.lower()] = number_input_scientific(f'{param.capitalize()} (kg/m³)', value=0.0, step=0.0001)
+    optional_params = [
+        ('bario', 'Bário'),
+        ('cobre', 'Cobre'),
+        ('selenio', 'Selênio'),
+        ('zinco', 'Zinco'),
+        ('tolueno', 'Tolueno'),
+        ('cromo', 'Cromo'),
+        ('cadmio', 'Cádmio'),
+        ('chumbo', 'Chumbo'),
+        ('niquel', 'Níquel')
+    ]
+    
+    col1, col2 = st.columns(2)
+    
+    for i, (param_key, param_name) in enumerate(optional_params):
+        with col1 if i % 2 == 0 else col2:
+            inputs[param_key] = input_with_suggestion(f'{param_name} (kg/m³)', param_key, value=0.0, step=0.0001, sugestoes=sugestoes)
 
 # Passo 3: Disposição do Lodo
 st.header('Passo 3: Disposição do Lodo')
@@ -590,40 +769,57 @@ if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
     
     col1, col2 = st.columns(2)
     with col1:
-        distancia_lodo = number_input_scientific('Distância para o transporte do lodo (Ida e Volta) (km)', value=0.0, step=0.1)
+        distancia_lodo = input_with_suggestion('Distância para o transporte do lodo (Ida e Volta) (km)', 'distancia_lodo', value=0.0, step=0.1, sugestoes=sugestoes)
     with col2:
-        quantidade_lodo = number_input_scientific('Quantidade de lodo (ton/m³)', value=0.0, step=0.001)
+        quantidade_lodo = input_with_suggestion('Quantidade de lodo (ton/m³)', 'quantidade_lodo', value=0.0, step=0.001, sugestoes=sugestoes)
     
     ton_km_factor_lodo = distancia_lodo * quantidade_lodo
     st.write(f'Fator ton.km para o lodo: {ton_km_factor_lodo:.2e}')
+    
+    # Botão para sugerir ton_km_factor_lodo diretamente se disponível no cenário
+    if 'ton_km_factor_lodo' in sugestoes:
+        if st.button("Sugerir ton.km para lodo", key="sugerir_ton_km_lodo"):
+            ton_km_factor_lodo = sugestoes['ton_km_factor_lodo']
+            st.write(f'Fator ton.km para lodo sugerido: {ton_km_factor_lodo:.2e}')
 
 elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
     st.subheader('Composição do Lodo')
     
     col1, col2 = st.columns(2)
     with col1:
-        inputs['lodo_fosforo'] = number_input_scientific('Fósforo (kg/m³)', value=0.0, step=0.001)
+        inputs['lodo_fosforo'] = input_with_suggestion('Fósforo (kg/m³)', 'lodo_fosforo', value=0.0, step=0.001, sugestoes=sugestoes)
     with col2:
-        inputs['lodo_nitrogenio'] = number_input_scientific('Nitrogênio Amoniacal (kg/m³)', value=0.0, step=0.001)
+        inputs['lodo_nitrogenio'] = input_with_suggestion('Nitrogênio Amoniacal (kg/m³)', 'lodo_nitrogenio', value=0.0, step=0.001, sugestoes=sugestoes)
     
     st.write("Elementos adicionais (opcionais)")
     if st.checkbox('Mostrar elementos do lodo'):
         # Lista de elementos usando nomes padronizados (sem acentos, minúsculos)
         elementos_adicionais = [
-            'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
-            'molibdenio', 'niquel', 'estanho', 'zinco', 'diclorobenzeno'
+            ('arsenio', 'Arsênio'),
+            ('bario', 'Bário'),
+            ('cadmio', 'Cádmio'),
+            ('chumbo', 'Chumbo'),
+            ('cobre', 'Cobre'),
+            ('cromo', 'Cromo'),
+            ('molibdenio', 'Molibdênio'),
+            ('niquel', 'Níquel'),
+            ('estanho', 'Estanho'),
+            ('zinco', 'Zinco'),
+            ('diclorobenzeno', 'Diclorobenzeno')
         ]
         
-        # Para cada elemento, criamos um campo de entrada
-        for elemento in elementos_adicionais:
-            # Criamos a chave do input com prefixo 'lodo_'
-            input_key = f'lodo_{elemento}'
-            # Criamos o campo de entrada, capitalizando o nome do elemento para exibição
-            inputs[input_key] = number_input_scientific(
-                f'Lodo - {elemento.capitalize()} (kg/m³)', 
-                value=0.0, 
-                step=0.0001
-            )
+        col1, col2 = st.columns(2)
+        
+        for i, (elemento_key, elemento_name) in enumerate(elementos_adicionais):
+            input_key = f'lodo_{elemento_key}'
+            with col1 if i % 2 == 0 else col2:
+                inputs[input_key] = input_with_suggestion(
+                    f'Lodo - {elemento_name} (kg/m³)', 
+                    input_key, 
+                    value=0.0, 
+                    step=0.0001,
+                    sugestoes=sugestoes
+                )
     
 # Passo 4: Queima de Biogás
 st.header('Passo 4: Queima de Biogás')
@@ -635,7 +831,7 @@ tipo_queimador = st.selectbox(
 
 if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
     st.subheader('Emissões do Queimador Fechado')
-    inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
+    inputs['dioxido_carbono'] = input_with_suggestion('Dióxido de Carbono (kg/m³)', 'dioxido_carbono', value=0.0, step=0.001, sugestoes=sugestoes)
     
     # Passo 5 aparece automaticamente quando o queimador fechado é selecionado
     st.header('Passo 5: Reaproveitamento Biogás')
@@ -643,10 +839,12 @@ if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
     st.info('A eficiência de conversão energética está definida em 100%.')
     
     # Agora apenas um input para a quantidade de biogás
-    inputs['quantidade_biogas'] = number_input_scientific(
+    inputs['quantidade_biogas'] = input_with_suggestion(
         'Eletricidade (kWh.m−3)', 
+        'quantidade_biogas',
         value=0.0, 
-        step=0.1
+        step=0.1,
+        sugestoes=sugestoes
     )
     
     # Definimos a eficiência como 100% automaticamente
@@ -657,10 +855,11 @@ elif tipo_queimador == 'Queimador aberto':
     
     col1, col2 = st.columns(2)
     with col1:
-        inputs['metano'] = number_input_scientific('Metano (kg/m³)', value=0.0, step=0.001)
-        inputs['dioxido_carbono'] = number_input_scientific('Dióxido de Carbono (kg/m³)', value=0.0, step=0.001)
+        inputs['metano'] = input_with_suggestion('Metano (kg/m³)', 'metano', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['dioxido_carbono'] = input_with_suggestion('Dióxido de Carbono (kg/m³)', 'dioxido_carbono', value=0.0, step=0.001, sugestoes=sugestoes)
     with col2:
-        inputs['oxido_nitroso'] = number_input_scientific('Óxido Nitroso (kg/m³)', value=0.0, step=0.001)
+        inputs['oxido_nitroso'] = input_with_suggestion('Óxido Nitroso (kg/m³)', 'oxido_nitroso', value=0.0, step=0.001, sugestoes=sugestoes)
+        inputs['nitrogenio_amoniacal'] = input_with_suggestion('Nitrogênio Amoniacal (kg/m³)', 'nitrogenio_amoniacal', value=0.0, step=0.001, sugestoes=sugestoes)
 
 # Coloque isso antes do botão 'Calcular Impactos'
 st.markdown("---")
