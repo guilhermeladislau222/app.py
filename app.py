@@ -548,9 +548,11 @@ st.subheader('Tratamento UASB')
 st.write('O tratamento UASB está pré-selecionado.')
 
 # Abas para UASB personalizado vs pré-configurado
-uasb_tab1, uasb_tab2 = st.tabs(["UASB Personalizado", "Somente UASB"])
+with uasb_tab1:
+    # Create columns for UASB inputs
+    col1, col2 = st.columns(2)
 
-with col1:
+    with col1:
         st.write("Parâmetros Operacionais")
         inputs['uasb_vazao'] = number_input_scientific('Vazão (m³/dia)', value=0.0, step=1.0, key="main_uasb_vazao")
         inputs['uasb_temp'] = number_input_scientific('Temperatura (°C)', value=25.0, step=0.1, key="main_uasb_temp")
@@ -561,7 +563,7 @@ with col1:
         inputs['uasb_dqo_removal'] = number_input_scientific('Eficiência Remoção DQO (%)', value=100.0, step=1.0, key="main_uasb_dqo")
         inputs['uasb_dbo_removal'] = number_input_scientific('Eficiência Remoção DBO (%)', value=100.0, step=1.0, key="main_uasb_dbo")
         inputs['uasb_sst_removal'] = number_input_scientific('Eficiência Remoção SST (%)', value=100.0, step=1.0, key="main_uasb_sst")
-
+        
     # Additional UASB parameters
     st.write("Parâmetros de Produção")
     col3, col4 = st.columns(2)
