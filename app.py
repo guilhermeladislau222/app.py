@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Valores de referência da tabela para cada cenário
+# Valores de referência da tabela para cada cenário #### Tenho que manter o fluxograma de Variaveis, lembrese do mind map da cronstrução do modelo
 SCENARIO_VALUES = {
     'Somente UASB': {
         'eletricidade': 3.58e-03,
@@ -113,7 +113,7 @@ SCENARIO_VALUES = {
     }
 }
 
-# Fatores para impactos
+# Fatores para impactos # lemrbra doq o Fernando disse sobre os fatores de multiplicação
 IMPACT_FACTORS = {
     'eletricidade': {
         'Ecotoxidade de Água Doce': 0.00097,
@@ -257,9 +257,9 @@ IMPACT_FACTORS = {
         'Ecotoxidade Terrestre': 8.79e-16,
     },
     'zinco': {
-        'Ecotoxidade de Água Doce': 211.0000,
-        'Ecotoxidade Marinha': 299.0,
-        'Ecotoxidade Terrestre': 1.29e-14,
+        'Ecotoxidade de Água Doce': 5.14,
+        'Ecotoxidade Marinha': 4.29,
+        'Ecotoxidade Terrestre': 2.15e-16,
     },
     'tolueno': {
         'Ecotoxidade de Água Doce': 0.1390,
@@ -282,9 +282,9 @@ IMPACT_FACTORS = {
         'Ecotoxidade Terrestre': 2.03e-17,
     },
     'niquel': {
-        'Ecotoxidade de Água Doce': 46.0000,
-        'Ecotoxidade Marinha': 57.1,
-        'Ecotoxidade Terrestre': 2.91e-15,
+        'Ecotoxidade de Água Doce': 3.17,
+        'Ecotoxidade Marinha': 2.29,
+        'Ecotoxidade Terrestre': 1.35e-16,
     },
     'fosforo': {
         'Eutrofização de Água Doce': 0.1000,
