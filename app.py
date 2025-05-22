@@ -297,6 +297,11 @@ IMPACT_FACTORS = {
         'Ecotoxidade Marinha': 1.33,
         'Ecotoxidade Terrestre': 6.42e-17,
     },
+    'Molibdênio': {
+        'Ecotoxidade de Água Doce': 0.1540,
+        'Ecotoxidade Marinha': 0.13,
+        'Ecotoxidade Terrestre': 5.89e-18,
+    },
     'estanho': {
         'Ecotoxidade de Água Doce': 0.0696,
         'Ecotoxidade Marinha': 0.0444,
