@@ -4,7 +4,7 @@ import plotly.express as px
 
 # Valores de referência da tabela para cada cenário #### Tenho que manter o fluxograma de Variaveis, lembrese do mind map da cronstrução do modelo
 SCENARIO_VALUES = {
-    'Somente UASB': {
+    'UASB Only': {
         'eletricidade': 3.58e-03,
         'fosforo_total': 5.82e-03,
         'nitrogenio_total': 6.72e-02,
@@ -106,7 +106,7 @@ SCENARIO_VALUES = {
         'quantidade_lodo': 5.87e-02,
         'ton_km_factor_lodo': 3.16e+01
     },
-    'Reaproveitamento Biogás': {
+    'Biogas Reuse': {
         'eletricidade': 1.92e-02,
         'dioxido_carbono': 4.08e-02,
         'quantidade_biogas': 4.17e-01
@@ -371,13 +371,13 @@ IMPACT_NAMES = {
 # Adicione as novas funções aqui
 def calculate_impacts_by_category(inputs, impact_type):
     category_impacts = {
-        'Consumo de Energia': 0,
-        'Produtos Químicos': 0,
-        'Transportes': 0,
-        'Emissões para a Água': 0,
-        'Emissões Atmosféricas': 0,
-        'Disposição de Lodo': 0,
-        'Disposição de Resíduos': 0
+        'Energy Consumption': 0,
+        'Chemical Products': 0,
+        'Transportation': 0,
+        'Water Emissions': 0,
+        'Atmospheric Emissions': 0,
+        'Sludge Disposal': 0,
+        'Waste Disposal': 0
     }
     
     # Produtos Químicos
@@ -387,48 +387,48 @@ def calculate_impacts_by_category(inputs, impact_type):
                         'sulfato_sodio']
     for product in chemical_products:
         if product in inputs:
-            category_impacts['Produtos Químicos'] += inputs[product] * IMPACT_FACTORS.get(product, {}).get(impact_type, 0)
+            category_impacts['Chemical Products'] += inputs[product] * IMPACT_FACTORS.get(product, {}).get(impact_type, 0)
 
     # Emissões para a Água
     water_emissions = ['fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio', 
                       'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel']
     for emission in water_emissions:
         if emission in inputs:
-            category_impacts['Emissões para a Água'] += inputs[emission] * IMPACT_FACTORS.get(emission, {}).get(impact_type, 0)
+            category_impacts['Water Emissions'] += inputs[emission] * IMPACT_FACTORS.get(emission, {}).get(impact_type, 0)
 
     # Emissões Atmosféricas
     if 'metano' in inputs:
-        category_impacts['Emissões Atmosféricas'] += inputs['metano'] * IMPACT_FACTORS.get('metano', {}).get(impact_type, 0)
+        category_impacts['Atmospheric Emissions'] += inputs['metano'] * IMPACT_FACTORS.get('metano', {}).get(impact_type, 0)
     if 'dioxido_carbono' in inputs:
-        category_impacts['Emissões Atmosféricas'] += inputs['dioxido_carbono'] * IMPACT_FACTORS.get('dioxido_carbono', {}).get(impact_type, 0)
+        category_impacts['Atmospheric Emissions'] += inputs['dioxido_carbono'] * IMPACT_FACTORS.get('dioxido_carbono', {}).get(impact_type, 0)
     if 'oxido_nitroso' in inputs:
-        category_impacts['Emissões Atmosféricas'] += inputs['oxido_nitroso'] * IMPACT_FACTORS.get('oxido_nitroso', {}).get(impact_type, 0)
+        category_impacts['Atmospheric Emissions'] += inputs['oxido_nitroso'] * IMPACT_FACTORS.get('oxido_nitroso', {}).get(impact_type, 0)
 
     # Consumo de Energia
     if 'eletricidade' in inputs:
-        category_impacts['Consumo de Energia'] = inputs['eletricidade'] * IMPACT_FACTORS.get('eletricidade', {}).get(impact_type, 0)
+        category_impacts['Energy Consumption'] = inputs['eletricidade'] * IMPACT_FACTORS.get('eletricidade', {}).get(impact_type, 0)
 
     # Transportes
     if 'ton_km_factor' in inputs:
-        category_impacts['Transportes'] += inputs['ton_km_factor'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
+        category_impacts['Transportation'] += inputs['ton_km_factor'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
     if 'ton_km_factor_lodo' in inputs:
-        category_impacts['Transportes'] += inputs['ton_km_factor_lodo'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
+        category_impacts['Transportation'] += inputs['ton_km_factor_lodo'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
     if 'transportes_quimicos' in inputs:
-        category_impacts['Transportes'] += inputs['transportes_quimicos'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
+        category_impacts['Transportation'] += inputs['transportes_quimicos'] * IMPACT_FACTORS.get('transportes', {}).get(impact_type, 0)
 
     # Disposição de Lodo
     if 'quantidade_lodo' in inputs and 'disposicao_lodo' in inputs:
-        if inputs['disposicao_lodo'] == 'Disposição em aterro':
-            category_impacts['Disposição de Lodo'] = inputs['quantidade_lodo'] * IMPACT_FACTORS.get('lodo_aterro', {}).get(impact_type, 0)
-        elif inputs['disposicao_lodo'] == 'Disposição em lixão':
-            category_impacts['Disposição de Lodo'] = inputs['quantidade_lodo'] * IMPACT_FACTORS.get('lodo_lixao', {}).get(impact_type, 0)
+        if inputs['disposicao_lodo'] == 'Landfill disposal':
+            category_impacts['Sludge Disposal'] = inputs['quantidade_lodo'] * IMPACT_FACTORS.get('lodo_aterro', {}).get(impact_type, 0)
+        elif inputs['disposicao_lodo'] == 'Dump disposal':
+            category_impacts['Sludge Disposal'] = inputs['quantidade_lodo'] * IMPACT_FACTORS.get('lodo_lixao', {}).get(impact_type, 0)
 
     # Disposição de Resíduos
     if 'quantity' in inputs and 'destination' in inputs:
-        if inputs['destination'] == 'Aterro Sanitário':
-            category_impacts['Disposição de Resíduos'] = inputs['quantity'] * IMPACT_FACTORS.get('residuos_trat_preliminar_aterro', {}).get(impact_type, 0)
+        if inputs['destination'] == 'Sanitary Landfill':
+            category_impacts['Waste Disposal'] = inputs['quantity'] * IMPACT_FACTORS.get('residuos_trat_preliminar_aterro', {}).get(impact_type, 0)
         else:
-            category_impacts['Disposição de Resíduos'] = inputs['quantity'] * IMPACT_FACTORS.get('residuos_trat_preliminar_lixao', {}).get(impact_type, 0)
+            category_impacts['Waste Disposal'] = inputs['quantity'] * IMPACT_FACTORS.get('residuos_trat_preliminar_lixao', {}).get(impact_type, 0)
 
     # Remove categorias com valor zero
     return {k: v for k, v in category_impacts.items() if abs(v) > 1e-10}
@@ -437,13 +437,13 @@ def group_parameters_by_category(inputs):
     # Define as categorias e seus respectivos parâmetros
     categories = {
         # Emissões para água inclui todos os parâmetros de qualidade da água
-        'Emissões para a água': [
+        'Water emissions': [
             'fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio',
             'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel'
         ],
         
         # Emissões para o solo inclui todos os parâmetros relacionados ao lodo
-        'Emissões para o solo (Lodo)': [
+        'Soil emissions (Sludge)': [
             'lodo_fosforo', 'lodo_nitrogenio', 'lodo_arsenio', 'lodo_bario',
             'lodo_cadmio', 'lodo_chumbo', 'lodo_cobre', 'lodo_cromo',
             'lodo_molibdenio', 'lodo_niquel', 'lodo_estanho', 'lodo_zinco',
@@ -451,23 +451,23 @@ def group_parameters_by_category(inputs):
         ],
         
         # Emissões para o ar inclui gases e compostos voláteis
-        'Emissões para o ar': [
+        'Air emissions': [
             'metano', 'oxido_nitroso', 'nitrogenio_amoniacal', 'dioxido_carbono'
         ],
         
         # Resíduos inclui todos os tipos de disposição, incluindo ferti-irrigação
-        'Resíduos': [
+        'Waste': [
             'residuos_trat_preliminar_aterro', 'residuos_trat_preliminar_lixao',
             'lodo_aterro', 'lodo_lixao'
         ] + [f'ferti_irrigacao_{impact}' for impact in IMPACT_NAMES],  
         
         # Transportes inclui todos os impactos relacionados ao transporte
-        'Transportes': [
+        'Transportation': [
             'transportes', 'transportes_quimicos'
         ],
         
         # Emissões evitadas inclui fatores que reduzem impactos
-        'Emissões evitadas': [
+        'Avoided emissions': [
             'eletricidade'
         ]
     }
@@ -484,20 +484,20 @@ def create_category_graphs(grouped_data):
     graphs = []
     for category, data in grouped_data.items():
         if data:
-            df = pd.DataFrame(list(data.items()), columns=['Parâmetro', 'Valor'])
+            df = pd.DataFrame(list(data.items()), columns=['Parameter', 'Value'])
             
             fig = px.bar(
                 df,
-                x='Parâmetro',
-                y='Valor',
+                x='Parameter',
+                y='Value',
                 title=f'{category}',
-                labels={'Valor': 'Impacto'},
-                color='Parâmetro'
+                labels={'Value': 'Impact'},
+                color='Parameter'
             )
             
             fig.update_layout(
-                xaxis_title="Parâmetro",
-                yaxis_title="Valor",
+                xaxis_title="Parameter",
+                yaxis_title="Value",
                 xaxis={'categoryorder':'total descending'},
                 showlegend=False
             )
@@ -512,7 +512,7 @@ def parse_scientific_notation(value):
     except ValueError:
         return 0.0
 
-def number_input_with_suggestion(label, value=0.0, step=0.1, key=None, selected_scenario='Somente UASB'):
+def number_input_with_suggestion(label, value=0.0, step=0.1, key=None, selected_scenario='UASB Only'):
     """
     Cria um campo de entrada com um botão de sugestão ao lado que atualiza o valor quando clicado
     """
@@ -559,7 +559,7 @@ def calculate_impacts(inputs):
     # Processamento específico para resíduos do tratamento preliminar
     if 'quantity' in inputs and 'destination' in inputs:
         # Seleciona os fatores corretos baseado no destino (aterro ou lixão)
-        impact_key = 'residuos_trat_preliminar_aterro' if inputs['destination'] == 'Aterro Sanitário' else 'residuos_trat_preliminar_lixao'
+        impact_key = 'residuos_trat_preliminar_aterro' if inputs['destination'] == 'Sanitary Landfill' else 'residuos_trat_preliminar_lixao'
         
         # Aplica os fatores de impacto dos resíduos
         for impact, factor in IMPACT_FACTORS[impact_key].items():
@@ -573,7 +573,7 @@ def calculate_impacts(inputs):
     # Processamento específico para disposição do lodo
     if 'disposicao_lodo' in inputs:
         # Caso 1: Disposição em Aterro
-        if inputs['disposicao_lodo'] == 'Disposição em aterro':
+        if inputs['disposicao_lodo'] == 'Landfill disposal':
             if 'quantidade_lodo' in inputs:
                 # Aplica os fatores de impacto do lodo em aterro
                 for impact, factor in IMPACT_FACTORS['lodo_aterro'].items():
@@ -585,7 +585,7 @@ def calculate_impacts(inputs):
                         results[impact] += inputs['ton_km_factor_lodo'] * factor
         
         # Caso 2: Disposição em Lixão
-        elif inputs['disposicao_lodo'] == 'Disposição em lixão':
+        elif inputs['disposicao_lodo'] == 'Dump disposal':
             if 'quantidade_lodo' in inputs:
                 # Aplica os fatores de impacto do lodo em lixão
                 for impact, factor in IMPACT_FACTORS['lodo_lixao'].items():
@@ -597,7 +597,7 @@ def calculate_impacts(inputs):
                         results[impact] += inputs['ton_km_factor_lodo'] * factor
         
         # Caso 3: Ferti-irrigação
-        elif inputs['disposicao_lodo'] == 'Ferti-irrigação ou agricultura':
+        elif inputs['disposicao_lodo'] == 'Fertigation or agriculture':
             # Lista de elementos que podem estar presentes no lodo
             elementos_lodo = [
                 'arsenio', 'bario', 'cadmio', 'chumbo', 'cobre', 'cromo',
@@ -645,7 +645,7 @@ st.title('FastLCA')  # Título alterado para FastLCA
 # Permitir ao usuário selecionar um cenário de valores de referência
 selected_scenario = st.sidebar.selectbox(
     "Select a reference values scenario",
-    ["Somente UASB", "UASB+FBP", "UASB+Wetland", "UASB+LP", "Reaproveitamento Biogás"]
+    ["UASB Only", "UASB+FBP", "UASB+Wetland", "UASB+LP", "Biogas Reuse"]
 )
 
 # Passo 1: Processo de Tratamento
@@ -660,7 +660,7 @@ with col1:
     distance = number_input_with_suggestion('Transport distance for waste (Round Trip) (km)', value=0.0, step=0.1, key="distance", selected_scenario=selected_scenario)
     quantity = number_input_with_suggestion('Waste quantity (ton/m³)', value=0.0, step=0.001, key="quantity", selected_scenario=selected_scenario)
 with col2:
-    destination = st.selectbox('Waste destination', ['Lixão', 'Aterro Sanitário'])
+    destination = st.selectbox('Waste destination', ['Dump', 'Sanitary Landfill'])
 
 st.info('Quantity multiplied by km gives the factor in ton.km')
 st.info('Impacts in each category differ according to the destination.')
@@ -676,10 +676,10 @@ st.write('UASB treatment is pre-selected.')
 st.subheader('Additional Processes')
 additional_processes = st.multiselect(
     'Select Additional Process(es)',
-    ['Somente UASB',
-     'Wetland de Fluxo Vertical', 
-     'Filtro Biológico percolador + Decantador Segundario', 
-     'Lagoa de Polimento']
+    ['UASB Only',
+     'Vertical Flow Wetland', 
+     'Trickling Filter + Secondary Clarifier', 
+     'Polishing Pond']
 )
 
 # Nova seção para produtos químicos
@@ -753,10 +753,10 @@ st.header('Step 3: Sludge Disposal')
 
 disposicao_lodo = st.selectbox(
     'Choose the sludge disposal method',
-    ['Disposição em aterro', 'Disposição em lixão', 'Ferti-irrigação ou agricultura']
+    ['Landfill disposal', 'Dump disposal', 'Fertigation or agriculture']
 )
 
-if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
+if disposicao_lodo in ['Landfill disposal', 'Dump disposal']:
     st.subheader('Sludge Treatment')
     
     col1, col2 = st.columns(2)
@@ -768,7 +768,7 @@ if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
     ton_km_factor_lodo = distancia_lodo * quantidade_lodo
     st.write(f'Factor ton.km for sludge: {ton_km_factor_lodo:.2e}')
 
-elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
+elif disposicao_lodo == 'Fertigation or agriculture':
     st.subheader('Sludge Composition')
     
     col1, col2 = st.columns(2)
@@ -812,10 +812,10 @@ st.header('Step 4: Biogas Burning')
 
 tipo_queimador = st.selectbox(
     'Choose the burner type',
-    ['Queimador aberto', 'Queimador fechado com reaproveitamento energético']
+    ['Open burner', 'Closed burner with energy reuse']
 )
 
-if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
+if tipo_queimador == 'Closed burner with energy reuse':
     st.subheader('Closed Burner Emissions')
     inputs['dioxido_carbono'] = number_input_with_suggestion('Carbon Dioxide (kg/m³)', value=0.0, step=0.001, key="dioxido_carbono", selected_scenario=selected_scenario)
     
@@ -830,13 +830,13 @@ if tipo_queimador == 'Queimador fechado com reaproveitamento energético':
         value=0.0, 
         step=0.1,
         key="quantidade_biogas",
-        selected_scenario="Reaproveitamento Biogás"  # Usando um cenário específico para este campo
+        selected_scenario="Biogas Reuse"  # Usando um cenário específico para este campo
     )
     
     # Definimos a eficiência como 100% automaticamente
     inputs['eficiencia_conversao'] = 100.0
 
-elif tipo_queimador == 'Queimador aberto':
+elif tipo_queimador == 'Open burner':
     st.subheader('Open Burner Emissions')
     
     col1, col2 = st.columns(2)
@@ -879,13 +879,13 @@ if st.button('Calculate Impacts'):
     inputs['ton_km_factor'] = ton_km_factor
     
     # Adicionamos as informações do lodo dependendo do tipo de disposição
-    if disposicao_lodo in ['Disposição em aterro', 'Disposição em lixão']:
+    if disposicao_lodo in ['Landfill disposal', 'Dump disposal']:
         # Para aterro e lixão, precisamos da disposição, quantidade e transporte
         inputs['disposicao_lodo'] = disposicao_lodo
         inputs['quantidade_lodo'] = quantidade_lodo
         inputs['ton_km_factor_lodo'] = ton_km_factor_lodo
     
-    elif disposicao_lodo == 'Ferti-irrigação ou agricultura':
+    elif disposicao_lodo == 'Fertigation or agriculture':
         # Para ferti-irrigação, só precisamos registrar o tipo de disposição
         # Os elementos já foram adicionados ao inputs quando foram preenchidos
         inputs['disposicao_lodo'] = disposicao_lodo
@@ -966,25 +966,25 @@ if st.button('Calculate Impacts'):
             # Criamos tabela de contribuições por categoria (apenas uma vez)
             st.subheader("Contribution by Category Table")
             df_categories_all = pd.DataFrame({
-                'Category': ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
-                             'Emissões para a Água', 'Emissões Atmosféricas', 
-                             'Disposição de Lodo', 'Disposição de Resíduos'],
-                'Impact': [category_impacts.get('Consumo de Energia', 0),
-                           category_impacts.get('Produtos Químicos', 0),
-                           category_impacts.get('Transportes', 0),
-                           category_impacts.get('Emissões para a Água', 0),
-                           category_impacts.get('Emissões Atmosféricas', 0),
-                           category_impacts.get('Disposição de Lodo', 0),
-                           category_impacts.get('Disposição de Resíduos', 0)]
+                'Category': ['Energy Consumption', 'Chemical Products', 'Transportation', 
+                             'Water Emissions', 'Atmospheric Emissions', 
+                             'Sludge Disposal', 'Waste Disposal'],
+                'Impact': [category_impacts.get('Energy Consumption', 0),
+                           category_impacts.get('Chemical Products', 0),
+                           category_impacts.get('Transportation', 0),
+                           category_impacts.get('Water Emissions', 0),
+                           category_impacts.get('Atmospheric Emissions', 0),
+                           category_impacts.get('Sludge Disposal', 0),
+                           category_impacts.get('Waste Disposal', 0)]
             })
             st.table(df_categories_all)
     
             # Força exibição de todas as categorias no gráfico
             df_categories = pd.DataFrame(
                 [{'Category': cat, 'Impact': category_impacts.get(cat, 0)} 
-                 for cat in ['Consumo de Energia', 'Produtos Químicos', 'Transportes', 
-                            'Emissões para a Água', 'Emissões Atmosféricas', 
-                            'Disposição de Lodo', 'Disposição de Resíduos']]
+                 for cat in ['Energy Consumption', 'Chemical Products', 'Transportation', 
+                            'Water Emissions', 'Atmospheric Emissions', 
+                            'Sludge Disposal', 'Waste Disposal']]
             )
             
             # Cria o gráfico de categorias com estilo melhorado
