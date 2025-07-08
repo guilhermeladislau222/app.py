@@ -640,7 +640,7 @@ def calculate_impacts(inputs):
     
     return results
     
-st.title('FastLCA')  # Título alterado para FastLCA
+st.title('FastLCA')  # Título mantido em inglês
 
 # Permitir ao usuário selecionar um cenário de valores de referência
 selected_scenario = st.sidebar.selectbox(
@@ -651,7 +651,7 @@ selected_scenario = st.sidebar.selectbox(
 # Passo 1: Processo de Tratamento
 st.header('Step 1: Treatment Process')
 
-# Tratamento Preliminar (deve ser obrigatório)
+# Tratamento Preliminar (obrigatório)
 st.subheader('Preliminary Treatment')
 st.write('Preliminary treatment is mandatory.')
 
@@ -668,7 +668,7 @@ st.info('Impacts in each category differ according to the destination.')
 ton_km_factor = distance * quantity
 st.write(f'Factor ton.km: {ton_km_factor:.2e}')
 
-# UASB (deve ser pré-selecionado segundo o fernando)
+# UASB (pré-selecionado)
 st.subheader('UASB Treatment')
 st.write('UASB treatment is pre-selected.')
 
@@ -682,14 +682,13 @@ additional_processes = st.multiselect(
      'Polishing Pond']
 )
 
-# Nova seção para produtos químicos
+# Seção para produtos químicos
 st.header('Chemical Products')
 st.write('Select the chemical products used in treatment:')
 
-# Expandir/colapsar seção de produtos químicos
 show_chemicals = st.checkbox('Show chemical products', value=True)
 
-inputs = {}  # Inicializa o dicionário de inputs aqui
+inputs = {}
 
 if show_chemicals:
     col1, col2, col3 = st.columns(3)
@@ -779,7 +778,6 @@ elif disposicao_lodo == 'Fertigation or agriculture':
     
     st.write("Additional elements (optional)")
     if st.checkbox('Show sludge elements'):
-        # Lista de elementos usando nomes padronizados (sem acentos, minúsculos) e seus nomes de exibição
         elementos_adicionais = [
             ('arsenio', 'Arsenic'),
             ('bario', 'Barium'),
@@ -794,11 +792,8 @@ elif disposicao_lodo == 'Fertigation or agriculture':
             ('diclorobenzeno', 'Dichlorobenzene')
         ]
         
-        # Para cada elemento, criamos um campo de entrada
         for elemento_key, elemento_display in elementos_adicionais:
-            # Criamos a chave do input com prefixo 'lodo_'
             input_key = f'lodo_{elemento_key}'
-            # Criamos o campo de entrada com o botão de sugestão
             inputs[input_key] = number_input_with_suggestion(
                 f'Sludge - {elemento_display} (kg/m³)', 
                 value=0.0, 
@@ -819,21 +814,18 @@ if tipo_queimador == 'Closed burner with energy reuse':
     st.subheader('Closed Burner Emissions')
     inputs['dioxido_carbono'] = number_input_with_suggestion('Carbon Dioxide (kg/m³)', value=0.0, step=0.001, key="dioxido_carbono", selected_scenario=selected_scenario)
     
-    # Passo 5 aparece automaticamente quando o queimador fechado é selecionado
     st.header('Step 5: Biogas Reuse')
     st.write('Since you selected closed burner with energy reuse, fill in the biogas reuse data to calculate avoided emissions.')
     st.info('The energy conversion efficiency is set to 100%.')
     
-    # Agora apenas um input para a quantidade de biogás
     inputs['quantidade_biogas'] = number_input_with_suggestion(
         'Electricity (kWh.m−3)', 
         value=0.0, 
         step=0.1,
         key="quantidade_biogas",
-        selected_scenario="Biogas Reuse"  # Usando um cenário específico para este campo
+        selected_scenario="Biogas Reuse"
     )
     
-    # Definimos a eficiência como 100% automaticamente
     inputs['eficiencia_conversao'] = 100.0
 
 elif tipo_queimador == 'Open burner':
@@ -846,25 +838,21 @@ elif tipo_queimador == 'Open burner':
     with col2:
         inputs['oxido_nitroso'] = number_input_with_suggestion('Nitrous Oxide (kg/m³)', value=0.0, step=0.001, key="oxido_nitroso", selected_scenario=selected_scenario)
 
-# Coloque isso antes do botão 'Calcular Impactos'
+# Visualização
 st.markdown("---")
 st.subheader("Visualization Options")
 
-# Criamos duas colunas para organizar os controles
 viz_col1, viz_col2 = st.columns(2)
 
 with viz_col1:
     st.write("Select impact categories to visualize:")
-    # Criamos checkboxes para todas as categorias de impacto
     impact_options = {}
     for impact in IMPACT_NAMES.keys():
-        # Por padrão, 'Uso da Terra' vem desmarcado, os outros vêm marcados
         default_value = impact != 'Land Use'
         impact_options[impact] = st.checkbox(IMPACT_NAMES[impact], value=default_value, key=f"check_{impact}")
 
 with viz_col2:
     st.subheader("Detailed Analysis")
-    # Seletor de impacto para a visualização detalhada
     impact_selected = st.selectbox(
         'Select impact type for detailed view:',
         list(IMPACT_NAMES.keys())
