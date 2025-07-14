@@ -867,64 +867,42 @@ with viz_col2:
 
 # Botão para calcular os impactos
 if st.button('Calculate Impacts'):
-     if len(df_results) > 0:
     # Primeiro, adicionamos todas as informações do tratamento preliminar ao dicionário inputs
     inputs['quantity'] = quantity
     inputs['destination'] = destination
     inputs['ton_km_factor'] = ton_km_factor
     
-         if len(df_results) > 0:
-    # Adicionamos as informações     do lodo dependendo do tipo de disposição
-         if disposicao_lodo in ['Landfill disposal', 'Dump disposal']:
-        # Para aterro e lixão, precisamos da disposição, quantidade e transporte
+    # Adicionamos as informações do lodo dependendo do tipo de disposição
+    if disposicao_lodo in ['Landfill disposal', 'Dump disposal']:
         inputs['disposicao_lodo'] = disposicao_lodo
         inputs['quantidade_lodo'] = quantidade_lodo
         inputs['ton_km_factor_lodo'] = ton_km_factor_lodo
-    
-         elif disposicao_lodo == 'Fertigation or agriculture':
-        # Para ferti-irrigação, só precisamos registrar o tipo de disposição
-        # Os elementos já foram adicionados ao inputs quando foram preenchidos
-         inputs['disposicao_lodo'] = disposicao_lodo
-        # Tabela de resultados formatada com 8 casas decimais
-         st.subheader("Detailed Results (8 decimal places)")
-         df_results_formatted = df_results.copy()
-         df_results_formatted['Value'] = df_results_formatted['Value'].apply(format_number_8f)
-         st.table(df_results_formatted)
-        
-        # Tabela de categorias formatada com 8 casas decimais
-         st.subheader("Contribution by Category (8 decimal places)")
-         df_categories_all['Impact'] = df_categories_all['Impact'].apply(format_number_8f)
-         st.table(df_categories_all)
-
+    elif disposicao_lodo == 'Fertigation or agriculture':
+        inputs['disposicao_lodo'] = disposicao_lodo
     
     # Adicionamos as informações do queimador
     inputs['tipo_queimador'] = tipo_queimador
     
-    # Calculamos os impactos usando nossa função modificada
+    # Calculamos os impactos
     results = calculate_impacts(inputs)
     
     # Filtramos os resultados com base nas categorias selecionadas
     selected_impacts = [impact for impact, selected in impact_options.items() if selected]
     filtered_results = {k: v for k, v in results.items() if k in selected_impacts}
     
-    # Criamos DataFrame com apenas as categorias selecionadas
+    # Criamos DataFrame com as categorias selecionadas
     df_results = pd.DataFrame(
         list(filtered_results.items()), 
         columns=['Impact Category', 'Value']
     )
     
-    # Mapeamos os nomes das categorias para seus nomes completos com unidades
+    # Mapeamos os nomes das categorias
     df_results['Impact Category'] = df_results['Impact Category'].map(IMPACT_NAMES)
-    
-    # Garantimos que todos os valores são numéricos
     df_results['Value'] = pd.to_numeric(df_results['Value'], errors='coerce')
     
     # Verificamos se temos dados para mostrar
     if len(df_results) > 0:
-        # Mostramos o cabeçalho dos resultados
-        st.header('Results')
-        
-        # Criamos o gráfico principal com um estilo visual melhorado
+        # Gráfico principal
         fig = px.bar(
             df_results, 
             x='Impact Category', 
@@ -932,11 +910,9 @@ if st.button('Calculate Impacts'):
             title='Environmental Impacts by Category',
             labels={'Value': 'Impact Value'},
             color='Impact Category',
-            color_discrete_sequence=px.colors.qualitative.Bold,  # Cores mais vibrantes
-            template="plotly_white"  # Fundo branco com linhas de grade suaves
+            color_discrete_sequence=px.colors.qualitative.Bold,
+            template="plotly_white"
         )
-        
-        # Personalizamos o layout do gráfico principal
         fig.update_layout(
             xaxis_title="Impact Category",
             yaxis_title="Impact Value",
@@ -946,32 +922,19 @@ if st.button('Calculate Impacts'):
             margin=dict(t=50, b=100, l=100, r=30),
             title_font=dict(size=20, family="Arial", color="#333333"),
             font=dict(family="Arial", size=14),
-            xaxis_tickangle=-45,  # Ângulo dos rótulos do eixo x para melhor legibilidade
-            plot_bgcolor='white',  # Fundo branco
-            bargap=0.3  # Espaçamento entre barras
+            xaxis_tickangle=-45,
+            plot_bgcolor='white',
+            bargap=0.3
         )
-        
-        # Adiciona linhas de grade horizontais suaves para facilitar a leitura dos valores
-        fig.update_yaxes(
-            showgrid=True,
-            gridcolor='lightgray',
-            gridwidth=0.5
-        )
-        
-        # Remove linhas de grade verticais para um visual mais limpo
-        fig.update_xaxes(
-            showgrid=False
-        )
-        
-        # Mostramos o gráfico principal
-        st.plotly_chart(fig, use_container_width=True)  # Utiliza a largura total do container
+        fig.update_yaxes(showgrid=True, gridcolor='lightgray', gridwidth=0.5)
+        fig.update_xaxes(showgrid=False)
+        st.plotly_chart(fig, use_container_width=True)
         
         # Análise Detalhada por Categoria
         category_impacts = calculate_impacts_by_category(inputs, impact_selected)
         
         if category_impacts:
-            # Criamos tabela de contribuições por categoria (apenas uma vez)
-            st.subheader("Contribution by Category Table")
+            # Criar DataFrame para a tabela de categorias
             df_categories_all = pd.DataFrame({
                 'Category': ['Energy Consumption', 'Chemical Products', 'Transportation', 
                              'Water Emissions', 'Atmospheric Emissions', 
@@ -984,19 +947,22 @@ if st.button('Calculate Impacts'):
                            category_impacts.get('Sludge Disposal', 0),
                            category_impacts.get('Waste Disposal', 0)]
             })
-            st.table(df_categories_all)
-    
-            # Força exibição de todas as categorias no gráfico
-            df_categories = pd.DataFrame(
-                [{'Category': cat, 'Impact': category_impacts.get(cat, 0)} 
-                 for cat in ['Energy Consumption', 'Chemical Products', 'Transportation', 
-                            'Water Emissions', 'Atmospheric Emissions', 
-                            'Sludge Disposal', 'Waste Disposal']]
-            )
             
-            # Cria o gráfico de categorias com estilo melhorado
+            # Tabela de resultados formatada com 8 casas decimais
+            st.subheader("Detailed Results (8 decimal places)")
+            df_results_formatted = df_results.copy()
+            df_results_formatted['Value'] = df_results_formatted['Value'].apply(format_number_8f)
+            st.table(df_results_formatted)
+            
+            # Tabela de categorias formatada com 8 casas decimais
+            st.subheader("Contribution by Category (8 decimal places)")
+            df_categories_formatted = df_categories_all.copy()
+            df_categories_formatted['Impact'] = df_categories_formatted['Impact'].apply(format_number_8f)
+            st.table(df_categories_formatted)
+            
+            # Gráfico de categorias
             fig_categories = px.bar(
-                df_categories,
+                df_categories_all,
                 x='Category',
                 y='Impact',
                 title=f'Contribution by Category for {impact_selected}',
@@ -1005,7 +971,6 @@ if st.button('Calculate Impacts'):
                 color_discrete_sequence=px.colors.qualitative.Bold,
                 template="plotly_white"
             )
-            
             fig_categories.update_layout(
                 xaxis_title="Category",
                 yaxis_title=f"Impact ({IMPACT_NAMES[impact_selected].split('(')[1].strip(')')})",
@@ -1019,25 +984,12 @@ if st.button('Calculate Impacts'):
                 plot_bgcolor='white',
                 bargap=0.3
             )
-            
-            # Adiciona linhas de grade horizontais
-            fig_categories.update_yaxes(
-                showgrid=True,
-                gridcolor='lightgray',
-                gridwidth=0.5
-            )
-            
-            # Remove linhas de grade verticais
-            fig_categories.update_xaxes(
-                showgrid=False
-            )
-            
+            fig_categories.update_yaxes(showgrid=True, gridcolor='lightgray', gridwidth=0.5)
+            fig_categories.update_xaxes(showgrid=False)
             st.plotly_chart(fig_categories, use_container_width=True)
+            
             st.success("Detailed analysis completed!")
         else:
             st.warning("Insufficient data to show detailed graph for this impact category.")
-        
-        # Mostramos a tabela com todos os resultados
-        st.table(df_results)
     else:
         st.warning("No impact category selected for visualization.")
