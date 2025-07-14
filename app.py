@@ -949,16 +949,12 @@ if st.button('Calculate Impacts'):
             })
             
             # Tabela de resultados formatada com 8 casas decimais
-            st.subheader("Detailed Results (8 decimal places)")
+            st.subheader("Environmental Impacts by Category")
             df_results_formatted = df_results.copy()
             df_results_formatted['Value'] = df_results_formatted['Value'].apply(format_number_8f)
             st.table(df_results_formatted)
             
-            # Tabela de categorias formatada com 8 casas decimais
-            st.subheader("Contribution by Category (8 decimal places)")
-            df_categories_formatted = df_categories_all.copy()
-            df_categories_formatted['Impact'] = df_categories_formatted['Impact'].apply(format_number_8f)
-            st.table(df_categories_formatted)
+
             
             # Gráfico de categorias
             fig_categories = px.bar(
@@ -987,6 +983,11 @@ if st.button('Calculate Impacts'):
             fig_categories.update_yaxes(showgrid=True, gridcolor='lightgray', gridwidth=0.5)
             fig_categories.update_xaxes(showgrid=False)
             st.plotly_chart(fig_categories, use_container_width=True)
+                        # Tabela de categorias formatada com 8 casas decimais
+            st.subheader("Contribution by Category")
+            df_categories_formatted = df_categories_all.copy()
+            df_categories_formatted['Impact'] = df_categories_formatted['Impact'].apply(format_number_8f)
+            st.table(df_categories_formatted)
             
             st.success("Detailed analysis completed!")
         else:
