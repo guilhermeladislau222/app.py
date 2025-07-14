@@ -368,6 +368,13 @@ IMPACT_NAMES = {
     'Terrestrial Ecotoxicity': "Terrestrial Ecotoxicity (kg 1,4-DCB)",
 }
 
+def format_number_8f(x):
+    """Format number to 8 decimal places or scientific notation"""
+    if abs(x) < 0.0001 or abs(x) >= 1000000:
+        return "{:.8e}".format(x)
+    else:
+        return "{:.8f}".format(x)
+
 # Adicione as novas funções aqui
 def calculate_impacts_by_category(inputs, impact_type):
     category_impacts = {
@@ -860,22 +867,35 @@ with viz_col2:
 
 # Botão para calcular os impactos
 if st.button('Calculate Impacts'):
+     if len(df_results) > 0:
     # Primeiro, adicionamos todas as informações do tratamento preliminar ao dicionário inputs
     inputs['quantity'] = quantity
     inputs['destination'] = destination
     inputs['ton_km_factor'] = ton_km_factor
     
-    # Adicionamos as informações do lodo dependendo do tipo de disposição
-    if disposicao_lodo in ['Landfill disposal', 'Dump disposal']:
+         if len(df_results) > 0:
+    # Adicionamos as informações     do lodo dependendo do tipo de disposição
+         if disposicao_lodo in ['Landfill disposal', 'Dump disposal']:
         # Para aterro e lixão, precisamos da disposição, quantidade e transporte
         inputs['disposicao_lodo'] = disposicao_lodo
         inputs['quantidade_lodo'] = quantidade_lodo
         inputs['ton_km_factor_lodo'] = ton_km_factor_lodo
     
-    elif disposicao_lodo == 'Fertigation or agriculture':
+         elif disposicao_lodo == 'Fertigation or agriculture':
         # Para ferti-irrigação, só precisamos registrar o tipo de disposição
         # Os elementos já foram adicionados ao inputs quando foram preenchidos
-        inputs['disposicao_lodo'] = disposicao_lodo
+         inputs['disposicao_lodo'] = disposicao_lodo
+        # Tabela de resultados formatada com 8 casas decimais
+         st.subheader("Detailed Results (8 decimal places)")
+         df_results_formatted = df_results.copy()
+         df_results_formatted['Value'] = df_results_formatted['Value'].apply(format_number_8f)
+         st.table(df_results_formatted)
+        
+        # Tabela de categorias formatada com 8 casas decimais
+         st.subheader("Contribution by Category (8 decimal places)")
+         df_categories_all['Impact'] = df_categories_all['Impact'].apply(format_number_8f)
+         st.table(df_categories_all)
+
     
     # Adicionamos as informações do queimador
     inputs['tipo_queimador'] = tipo_queimador
