@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import numpy as np
 
 # Valores de referência da tabela para cada cenário
 SCENARIO_VALUES = {
@@ -374,6 +375,10 @@ def format_number_8f(x):
         return "{:.8e}".format(x)
     else:
         return "{:.8f}".format(x)
+
+def format_number_normal(x):
+    """Format number to normal decimal format with 8 decimal places"""
+    return "{:.8f}".format(x)
 
 # Funções atualizadas com novos nomes
 def calculate_impacts_by_category(inputs, impact_type):
@@ -939,13 +944,13 @@ if st.button('Calculate Impacts'):
             # Criar DataFrame para a tabela de categorias
             df_categories_all = pd.DataFrame({
                 'Category': ['Energy Consumption', 'Chemical Products', 'Transportation', 
-                             'emissions to water', 'emissions to air',  # Alterado
+                             'emissions to water', 'emissions to air', 
                              'Sludge Disposal', 'Waste Disposal'],
                 'Impact': [category_impacts.get('Energy Consumption', 0),
                            category_impacts.get('Chemical Products', 0),
                            category_impacts.get('Transportation', 0),
-                           category_impacts.get('emissions to water', 0),  # Alterado
-                           category_impacts.get('emissions to air', 0),    # Alterado
+                           category_impacts.get('emissions to water', 0),
+                           category_impacts.get('emissions to air', 0),
                            category_impacts.get('Sludge Disposal', 0),
                            category_impacts.get('Waste Disposal', 0)]
             })
@@ -984,10 +989,15 @@ if st.button('Calculate Impacts'):
             fig_categories.update_xaxes(showgrid=False)
             st.plotly_chart(fig_categories, use_container_width=True)
             
-            # Tabela de categorias formatada com 8 casas decimais
+            # Tabela de categorias formatada com números normais (não científicos) com 8 casas decimais
             st.subheader("Contribution by Category")
             df_categories_formatted = df_categories_all.copy()
-            df_categories_formatted['Impact'] = df_categories_formatted['Impact'].apply(format_number_8f)
+            
+            # Formatar os números para exibição normal com 8 casas decimais
+            df_categories_formatted['Impact'] = df_categories_formatted['Impact'].apply(
+                lambda x: format_number_normal(x) if not pd.isna(x) else "0.00000000"
+            )
+            
             st.table(df_categories_formatted)
             
             st.success("Detailed analysis completed!")
