@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Valores de referência da tabela para cada cenário #### Tenho que manter o fluxograma de Variaveis, lembrese do mind map da cronstrução do modelo
+# Valores de referência da tabela para cada cenário
 SCENARIO_VALUES = {
     'UASB Only': {
         'eletricidade': 3.58e-03,
@@ -113,7 +113,7 @@ SCENARIO_VALUES = {
     }
 }
 
-# Fatores para impactos # lemrbra doq o Fernando disse sobre os fatores de multiplicação
+# Fatores para impactos
 IMPACT_FACTORS = {
     'eletricidade': {
         'Freshwater Ecotoxicity': 0.00097,
@@ -375,14 +375,14 @@ def format_number_8f(x):
     else:
         return "{:.8f}".format(x)
 
-# Adicione as novas funções aqui
+# Funções atualizadas com novos nomes
 def calculate_impacts_by_category(inputs, impact_type):
     category_impacts = {
         'Energy Consumption': 0,
         'Chemical Products': 0,
         'Transportation': 0,
-        'Water Emissions': 0,
-        'Atmospheric Emissions': 0,
+        'emissions to water': 0,  # Alterado
+        'emissions to air': 0,    # Alterado
         'Sludge Disposal': 0,
         'Waste Disposal': 0
     }
@@ -401,15 +401,15 @@ def calculate_impacts_by_category(inputs, impact_type):
                       'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel']
     for emission in water_emissions:
         if emission in inputs:
-            category_impacts['Water Emissions'] += inputs[emission] * IMPACT_FACTORS.get(emission, {}).get(impact_type, 0)
+            category_impacts['emissions to water'] += inputs[emission] * IMPACT_FACTORS.get(emission, {}).get(impact_type, 0)
 
     # Emissões Atmosféricas
     if 'metano' in inputs:
-        category_impacts['Atmospheric Emissions'] += inputs['metano'] * IMPACT_FACTORS.get('metano', {}).get(impact_type, 0)
+        category_impacts['emissions to air'] += inputs['metano'] * IMPACT_FACTORS.get('metano', {}).get(impact_type, 0)
     if 'dioxido_carbono' in inputs:
-        category_impacts['Atmospheric Emissions'] += inputs['dioxido_carbono'] * IMPACT_FACTORS.get('dioxido_carbono', {}).get(impact_type, 0)
+        category_impacts['emissions to air'] += inputs['dioxido_carbono'] * IMPACT_FACTORS.get('dioxido_carbono', {}).get(impact_type, 0)
     if 'oxido_nitroso' in inputs:
-        category_impacts['Atmospheric Emissions'] += inputs['oxido_nitroso'] * IMPACT_FACTORS.get('oxido_nitroso', {}).get(impact_type, 0)
+        category_impacts['emissions to air'] += inputs['oxido_nitroso'] * IMPACT_FACTORS.get('oxido_nitroso', {}).get(impact_type, 0)
 
     # Consumo de Energia
     if 'eletricidade' in inputs:
@@ -444,7 +444,7 @@ def group_parameters_by_category(inputs):
     # Define as categorias e seus respectivos parâmetros
     categories = {
         # Emissões para água inclui todos os parâmetros de qualidade da água
-        'Water emissions': [
+        'emissions to water': [  # Alterado
             'fosforo_total', 'nitrogenio_total', 'bario', 'cobre', 'selenio',
             'zinco', 'tolueno', 'cromo', 'cadmio', 'chumbo', 'niquel'
         ],
@@ -458,7 +458,7 @@ def group_parameters_by_category(inputs):
         ],
         
         # Emissões para o ar inclui gases e compostos voláteis
-        'Air emissions': [
+        'emissions to air': [  # Alterado
             'metano', 'oxido_nitroso', 'nitrogenio_amoniacal', 'dioxido_carbono'
         ],
         
@@ -727,7 +727,8 @@ st.header('Step 2: Life Cycle Inventory')
 st.subheader('Energy Consumption')
 inputs['eletricidade'] = number_input_with_suggestion('Electricity (kWh/m³)', value=0.0, step=0.1, key="eletricidade", selected_scenario=selected_scenario)
 
-st.subheader('Water Emissions')
+# Alteração: Water Emissions -> emissions to water
+st.subheader('emissions to water')
 inputs['fosforo_total'] = number_input_with_suggestion('Total Phosphorus (kg/m³)', value=0.0, step=0.001, key="fosforo_total", selected_scenario=selected_scenario)
 inputs['nitrogenio_total'] = number_input_with_suggestion('Total Nitrogen (kg/m³)', value=0.0, step=0.001, key="nitrogenio_total", selected_scenario=selected_scenario)
 
@@ -825,8 +826,9 @@ if tipo_queimador == 'Closed burner with energy reuse':
     st.write('Since you selected closed burner with energy reuse, fill in the biogas reuse data to calculate avoided emissions.')
     st.info('The energy conversion efficiency is set to 100%.')
     
+    # Alteração: Electricity -> electricity - energy recovered
     inputs['quantidade_biogas'] = number_input_with_suggestion(
-        'Electricity (kWh.m−3)', 
+        'electricity - energy recovered (kWh.m−3)', 
         value=0.0, 
         step=0.1,
         key="quantidade_biogas",
@@ -937,13 +939,13 @@ if st.button('Calculate Impacts'):
             # Criar DataFrame para a tabela de categorias
             df_categories_all = pd.DataFrame({
                 'Category': ['Energy Consumption', 'Chemical Products', 'Transportation', 
-                             'Water Emissions', 'Atmospheric Emissions', 
+                             'emissions to water', 'emissions to air',  # Alterado
                              'Sludge Disposal', 'Waste Disposal'],
                 'Impact': [category_impacts.get('Energy Consumption', 0),
                            category_impacts.get('Chemical Products', 0),
                            category_impacts.get('Transportation', 0),
-                           category_impacts.get('Water Emissions', 0),
-                           category_impacts.get('Atmospheric Emissions', 0),
+                           category_impacts.get('emissions to water', 0),  # Alterado
+                           category_impacts.get('emissions to air', 0),    # Alterado
                            category_impacts.get('Sludge Disposal', 0),
                            category_impacts.get('Waste Disposal', 0)]
             })
@@ -953,8 +955,6 @@ if st.button('Calculate Impacts'):
             df_results_formatted = df_results.copy()
             df_results_formatted['Value'] = df_results_formatted['Value'].apply(format_number_8f)
             st.table(df_results_formatted)
-            
-
             
             # Gráfico de categorias
             fig_categories = px.bar(
@@ -983,7 +983,8 @@ if st.button('Calculate Impacts'):
             fig_categories.update_yaxes(showgrid=True, gridcolor='lightgray', gridwidth=0.5)
             fig_categories.update_xaxes(showgrid=False)
             st.plotly_chart(fig_categories, use_container_width=True)
-                        # Tabela de categorias formatada com 8 casas decimais
+            
+            # Tabela de categorias formatada com 8 casas decimais
             st.subheader("Contribution by Category")
             df_categories_formatted = df_categories_all.copy()
             df_categories_formatted['Impact'] = df_categories_formatted['Impact'].apply(format_number_8f)
