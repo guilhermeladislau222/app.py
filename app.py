@@ -25,7 +25,7 @@ SCENARIO_VALUES = {
         'lodo_niquel': 1.52e-06,
         'lodo_zinco': 6.47e-05,
         'metano': 3.11e-02,
-        'dioxido_carbono': 1.68e-02,
+        'dioxido_carbono': 4.08e-02,
         'quantity': 2.55e-02,
         'ton_km_factor': 2.38e-02
     },
