@@ -723,14 +723,16 @@ if show_chemicals:
         inputs['sulfato_ferro'] = number_input_with_suggestion('Iron Sulfate (kg/m³)', value=0.0, step=0.001, key="sulfato_ferro", selected_scenario=selected_scenario)
         inputs['transportes_quimicos'] = number_input_with_suggestion('Chemical Transport (kg.km)', value=0.0, step=0.1, key="transportes_quimicos", selected_scenario=selected_scenario)
     
-    st.write('Land Use')
-    inputs['uso_terra'] = number_input_with_suggestion('Area used (m²)', value=0.0, step=0.1, key="uso_terra", selected_scenario=selected_scenario)
 
 # Passo 2: Inventário do ciclo de vida
 st.header('Step 2: Life Cycle Inventory')
 
 st.subheader('Energy Consumption')
 inputs['eletricidade'] = number_input_with_suggestion('Electricity (kWh/m³)', value=0.0, step=0.1, key="eletricidade", selected_scenario=selected_scenario)
+
+    st.write('Land Use')
+    inputs['uso_terra'] = number_input_with_suggestion('Area used (m²)', value=0.0, step=0.1, key="uso_terra", selected_scenario=selected_scenario)
+
 
 # Alteração: Water Emissions -> emissions to water
 st.subheader('emissions to water')
