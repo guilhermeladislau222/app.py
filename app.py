@@ -730,8 +730,9 @@ st.header('Step 2: Life Cycle Inventory')
 st.subheader('Energy Consumption')
 inputs['eletricidade'] = number_input_with_suggestion('Electricity (kWh/m³)', value=0.0, step=0.1, key="eletricidade", selected_scenario=selected_scenario)
 
-    st.write('Land Use')
-    inputs['uso_terra'] = number_input_with_suggestion('Area used (m²)', value=0.0, step=0.1, key="uso_terra", selected_scenario=selected_scenario)
+    
+st.write('Land Use')
+inputs['uso_terra'] = number_input_with_suggestion('Area used (m²)', value=0.0, step=0.1, key="uso_terra", selected_scenario=selected_scenario)
 
 
 # Alteração: Water Emissions -> emissions to water
