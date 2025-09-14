@@ -732,7 +732,7 @@ inputs['eletricidade'] = number_input_with_suggestion('Electricity (kWh/m³)', v
 
     
 st.write('Land Use')
-inputs['uso_terra'] = number_input_with_suggestion('Area used (m²)', value=0.0, step=0.1, key="uso_terra", selected_scenario=selected_scenario)
+inputs['uso_terra'] = number_input_with_suggestion('Area used (m²/m³)', value=0.0, step=0.1, key="uso_terra", selected_scenario=selected_scenario)
 
 
 # Alteração: Water Emissions -> emissions to water
