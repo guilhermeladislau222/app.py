@@ -114,16 +114,16 @@ SCENARIO_VALUES = {
     }
 }
 
-# Fatores para impactos
+# Fatores para impactos teala 7 ## anotar no dicionario dps
 IMPACT_FACTORS = {
     'eletricidade': {
-        'Freshwater Ecotoxicity': 0.00097,
-        'Freshwater Eutrophication': 0.00000,
-        'Global Warming': 0.25056,
-        'Land Use': 0.00142,
-        'Marine Ecotoxicity': 0.00144,
-        'Marine Eutrophication': 0.00,
-        'Terrestrial Ecotoxicity': 0.28,
+        'Freshwater Ecotoxicity': 0.01512277,
+        'Freshwater Eutrophication': 0.00031961,
+        'Global Warming': 0.72363827,
+        'Land Use': 0.00969907,
+        'Marine Ecotoxicity': 0.02025201,
+        'Marine Eutrophication': 0.00002313,
+        'Terrestrial Ecotoxicity': 0.69250538,
     },
     'cloreto_ferrico': {
         'Freshwater Ecotoxicity': 0.06756,
