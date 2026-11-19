@@ -652,7 +652,7 @@ def calculate_impacts(inputs):
     
     return results
     
-st.title('FastLCA')  # Título mantido em inglês
+st.title('STREAMS')  # Título mantido em inglês
 
 # Permitir ao usuário selecionar um cenário de valores de referência
 selected_scenario = st.sidebar.selectbox(
